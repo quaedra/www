@@ -1,4 +1,4 @@
-// Builds Jet's documentation pages (public/jet/docs/) from the Markdown in the Jet repository,
+// Builds Jet-4B's documentation pages (public/jet-4b/docs/) from the Markdown in the Jet repository,
 // in the site's own style.
 //
 //   npm run docs                      # reads ../jet
@@ -15,17 +15,17 @@ import { Marked } from "marked";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = process.env.JET_REPO ?? join(root, "..", "jet");
-const out = join(root, "public", "jet", "docs");
-const github = "https://github.com/quaedra/jet";
+const out = join(root, "public", "jet-4b", "docs");
+const github = "https://github.com/quaedra/jet-4b";
 
 /** Repository file → page. Order is the docs navigation. */
 const pages = [
-  { source: "README.md", slug: "", title: "Docs", description: "Jet's prompt format, local runtime, training pipeline and project layout." },
-  { source: "docs/decision-index.md", slug: "decision-index", title: "Decision Index", description: "Jet's official Decision Index 0.3 result and how to run the benchmark yourself." },
-  { source: "TRAINING_HISTORY.md", slug: "training-history", title: "Training history", description: "Every Jet release from the first Qwen3-0.6B runs to v6.2 on Qwen3.5-4B." },
+  { source: "README.md", slug: "", title: "Docs", description: "Jet-4B's prompt format, local runtime, training pipeline and project layout." },
+  { source: "docs/decision-index.md", slug: "decision-index", title: "Decision Index", description: "Jet-4B's official Decision Index 0.3 result and how to run the benchmark yourself." },
+  { source: "TRAINING_HISTORY.md", slug: "training-history", title: "Training history", description: "Every Jet release, from the first 0.6B runs to Jet-4B v6.2." },
 ];
 const pageBySource = new Map(pages.map((page) => [page.source, page]));
-const url = (page) => `/jet/docs/${page.slug}`;
+const url = (page) => `/jet-4b/docs/${page.slug}`;
 
 if (!existsSync(join(repo, "README.md"))) {
   console.error(`No Jet repository at ${repo}. Set JET_REPO.`);
@@ -81,7 +81,7 @@ function copyImage(href, sourceDir) {
   const resolved = normalize(posix.join(sourceDir, href));
   const name = resolved.replace(/[\\/]/g, "-");
   copyFileSync(join(repo, resolved), join(out, "assets", name));
-  return `/jet/docs/assets/${name}`;
+  return `/jet-4b/docs/assets/${name}`;
 }
 
 function escape(text) {
@@ -89,16 +89,16 @@ function escape(text) {
 }
 
 function render(page, body, usesMermaid) {
-  // Jet's submenu, the same as on /jet.
+  // Jet-4B's submenu, the same as on /jet-4b.
   const nav = [
-    `<a href="/jet">Overview</a>`,
+    `<a href="/jet-4b">Overview</a>`,
     ...pages.map((other) => other === page
       ? `<a href="${url(other)}" aria-current="page">${other.title}</a>`
       : `<a href="${url(other)}">${other.title}</a>`),
     `<a href="${github}">GitHub</a>`,
-    `<a href="https://huggingface.co/michaljach/jet">Weights</a>`,
+    `<a href="https://huggingface.co/michaljach/jet-4b">Weights</a>`,
   ].join("\n        ");
-  const title = `${page.title} · Jet`;
+  const title = `${page.title} · Jet-4B`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -117,8 +117,8 @@ function render(page, body, usesMermaid) {
   <div class="wrap page">
     <header>
       <a class="crumb mono" href="/"><svg class="glyph" viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</a>
-      <h1>Jet</h1>
-      <nav class="links mono" aria-label="Jet">
+      <h1>Jet-4B</h1>
+      <nav class="links mono" aria-label="Jet-4B">
         ${nav}
       </nav>
     </header>

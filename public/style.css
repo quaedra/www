@@ -201,3 +201,4 @@ details.table summary { cursor: pointer; }
 .doc pre.mermaid { background: transparent; padding: 0; text-align: center; font: inherit; }
 .doc img { max-width: 100%; border-radius: 8px; }
 .doc p.note { font-size: 13px; margin-top: 48px; }
+.page section > p.aside { font-size: 13px; }

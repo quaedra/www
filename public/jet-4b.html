@@ -3,38 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Jet · Quaedra Research</title>
-  <meta name="description" content="Jet is a typed decision model: give it a state and named questions, get back choices, scores and calibrated probabilities.">
+  <title>Jet-4B · Quaedra Research</title>
+  <meta name="description" content="Jet-4B is a typed decision model: give it a state and named questions, get back choices, scores and calibrated probabilities.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="wrap page">
     <header>
       <a class="crumb mono" href="/"><svg class="glyph" viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</a>
-      <h1>Jet</h1>
+      <h1>Jet-4B</h1>
       <p class="lede">A typed decision model. Give it a state and named questions; it returns choices, scores and probabilities, never free-form text.</p>
-      <nav class="links mono" aria-label="Jet">
-        <a href="/jet" aria-current="page">Overview</a>
-        <a href="/jet/docs/">Docs</a>
-        <a href="/jet/docs/decision-index">Decision Index</a>
-        <a href="/jet/docs/training-history">Training history</a>
-        <a href="https://github.com/quaedra/jet">GitHub</a>
-        <a href="https://huggingface.co/michaljach/jet">Weights</a>
+      <nav class="links mono" aria-label="Jet-4B">
+        <a href="/jet-4b" aria-current="page">Overview</a>
+        <a href="/jet-4b/docs/">Docs</a>
+        <a href="/jet-4b/docs/decision-index">Decision Index</a>
+        <a href="/jet-4b/docs/training-history">Training history</a>
+        <a href="https://github.com/quaedra/jet-4b">GitHub</a>
+        <a href="https://huggingface.co/michaljach/jet-4b">Weights</a>
       </nav>
       <div class="kv">
         <div><b>v6.2</b><span>Latest release</span></div>
-        <div><b>Qwen3.5-4B</b><span>Base model, rank-16 LoRA</span></div>
+        <div><b>4B</b><span>Parameters, bf16</span></div>
         <div><b>40.0</b><span>Decision Index 0.3, #52 of 113</span></div>
       </div>
     </header>
 
     <section>
       <h2 class="mono">How it works</h2>
-      <p>Each answer option maps to a single label token. Jet reads the next-token logits for those labels only, divides by a temperature fitted on held-out data, and applies softmax. One forward pass per question, no sampling. Answers always follow the requested type, but decisions can still be wrong.</p>
+      <p>Each answer option maps to a single label token. Jet-4B reads the next-token logits for those labels only, divides by a temperature fitted on held-out data, and applies softmax. One forward pass per question, no sampling. Answers always follow the requested type, but decisions can still be wrong.</p>
       <table class="data">
         <thead><tr><th>Type</th><th>Criteria</th><th>Answer</th></tr></thead>
         <tbody>
@@ -43,17 +43,18 @@
           <tr><td><code>noul</code></td><td>None</td><td>Probability that the answer is yes</td></tr>
         </tbody>
       </table>
+      <p class="note aside">Fine-tuned from Qwen3.5-4B with a rank-16 LoRA, merged into full weights.</p>
     </section>
 
     <section>
       <h2 class="mono">Benchmarks</h2>
       <h3>Decision Index 0.3</h3>
-      <p class="note" style="margin-top:0">The official leaderboard, run by its maintainers on the full suite: 110,201 requests across 42 benchmarks, published October 7, 2026. Qwen3.5-4B models shown; Jet v6.2 scores 40.01, rank 52 of 113.</p>
+      <p class="note" style="margin-top:0">The official leaderboard, run by its maintainers on the full suite: 110,201 requests across 42 benchmarks, published October 7, 2026. Models on the same 4B base shown; Jet-4B v6.2 scores 40.01, rank 52 of 113.</p>
       <div class="chart" id="di"></div>
-      <p class="note">The index weights public benchmarks 20%, same skills 50% and new domains 30%, after equating each part across models. Scores within 0.9 points are tied, as Jet is with its neighbors. Jet answered 109,958 requests; 243 exceed its 16,384-token prompt limit. <a href="/jet/docs/decision-index">Details</a> · <a href="https://huggingface.co/spaces/multimodalart/jev-decision-index">Leaderboard</a></p>
+      <p class="note">The index weights public benchmarks 20%, same skills 50% and new domains 30%, after equating each part across models. Scores within 0.9 points are tied, as Jet-4B is with its neighbors. It answered 109,958 requests; 243 exceed its 16,384-token prompt limit. <a href="/jet-4b/docs/decision-index">Details</a> · <a href="https://huggingface.co/spaces/multimodalart/jev-decision-index">Leaderboard</a></p>
       <details class="table"><summary>Show as table</summary><table class="data" id="di-table"></table></details>
 
-      <h3>Jet v6.2 by area</h3>
+      <h3>v6.2 by area</h3>
       <p class="note" style="margin-top:0">Decision Index skill score per area.</p>
       <div class="chart" id="di-areas"></div>
       <p class="note">Strongest at tools and retrieval, weakest at knowledge and reasoning. Calibration: 66% accurate at 80% mean confidence (ECE 0.14), so confidences run high.</p>
@@ -61,13 +62,13 @@
       <h3>v6.1 → v6.2 on the local holdout</h3>
       <p class="note" style="margin-top:0">914 fixed cases, full merged BF16 weights.</p>
       <div class="chart" id="v62"></div>
-      <div class="legend"><span><i style="background:var(--s1)"></i>Jet v6.1</span><span><i style="background:var(--s2)"></i>Jet v6.2</span></div>
+      <div class="legend"><span><i style="background:var(--s1)"></i>v6.1</span><span><i style="background:var(--s2)"></i>v6.2</span></div>
       <p class="note">Small changes; not statistically significant. Financial sentiment measures SEntFiN transfer, not FinEntity.</p>
     </section>
 
     <section>
       <h2 class="mono">Examples</h2>
-      <p>Real outputs recorded in the model's reference file (Jet V5, Qwen3-0.6B, calibrated). Pick a case to see the request and the typed answer.</p>
+      <p>Real outputs recorded in the model's reference file (from Jet v5, an earlier 0.6B model, calibrated). Pick a case to see the request and the typed answer.</p>
       <div class="demo" id="jet-demo">
         <div class="chips" id="jet-cases" style="margin-top:0"></div>
         <div class="state" id="jet-state"></div>
@@ -84,8 +85,8 @@
     <section>
       <h2 class="mono" id="run-it">Run it</h2>
       <p>The v6.2 release is self-contained: merged bf16 weights plus the CUDA runtime.</p>
-<pre>hf download michaljach/jet --revision v6.2.0 --local-dir jet
-cd jet &amp;&amp; python -m pip install -r requirements.txt
+<pre>hf download michaljach/jet-4b --revision v6.2.0 --local-dir jet-4b
+cd jet-4b &amp;&amp; python -m pip install -r requirements.txt
 echo '{"state":"I was charged twice this month.",
   "questions":{"billing":{"type":"noul",
   "instructions":"Is this a billing issue?"}}}' | python jet.py</pre>
@@ -103,13 +104,13 @@ echo '{"state":"I was charged twice this month.",
   </div>
   <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
   <script type="module">
-    import { barChart, probBars } from "./charts.js";
+    import { barChart, probBars } from "/charts.js";
 
     // Decision Index 0.3 leaderboard (multimodalart/jev-decision-index, data/v03.json, 2026-10-07)
     const di = [
       ["Hopper (G) 1.2", 42.61, 41.15, 42.37, 39.61],
       ["JPT-4B", 41.63, 42.82, 40.11, 39.17],
-      ["Jet v6.2", 40.01, 42.17, 40.93, 34.46],
+      ["Jet-4B v6.2", 40.01, 42.17, 40.93, 34.46],
       ["Kev 4B r10", 39.50, 37.95, 36.17, 41.25],
       ["InternLM Intern-Decision", 38.21, 38.00, 39.10, 34.35],
       ["Interfaze lev", 36.53, 39.20, 37.20, 31.98],
@@ -151,13 +152,13 @@ echo '{"state":"I was charged twice this month.",
         { label: "Entity sent. F1", values: [71.16, 71.21] },
         { label: "Sarcasm F1", values: [46.81, 50.00] },
       ],
-      series: [{ name: "Jet v6.1", color: "var(--s1)" }, { name: "Jet v6.2", color: "var(--s2)" }],
+      series: [{ name: "v6.1", color: "var(--s1)" }, { name: "v6.2", color: "var(--s2)" }],
       min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
       fmt: (v, val) => (val ? v.toFixed(1) : String(v)),
     });
 
-    // Recorded golden cases (michaljach/jet @ 25ccbd9e, golden.json)
-    const cases = await (await fetch("data/jet-examples.json")).json();
+    // Recorded golden cases (michaljach/jet-4b @ 25ccbd9e, golden.json)
+    const cases = await (await fetch("/data/jet-examples.json")).json();
     const titles = {
       choice_dbpedia_0: "Entity type", choice_ag_news_2: "News topic", list_state: "Agent next step",
       choice_mnli_3: "Entailment", choice_massive_5: "User intent", score_yelp_3: "Review score",
