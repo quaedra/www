@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "docs": "node scripts/build-jet-docs.mjs",
+    "docs": "node scripts/build-docs.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
