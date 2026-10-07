@@ -1,5 +1,5 @@
 # nodd is served by its own worker on quaedra.com/nodd*; this only applies to www.quaedra.com.
 /nodd https://quaedra.com/nodd/ 301
 /nodd/* https://quaedra.com/nodd/:splat 301
-/jet https://quaedra.com/jet-4b 301
-/jet/* https://quaedra.com/jet-4b/:splat 301
+/jet-4b https://quaedra.com/jet 301
+/jet-4b/* https://quaedra.com/jet/:splat 301
