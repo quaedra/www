@@ -23,7 +23,7 @@
         <a href="/jet/docs/decision-index">Decision Index</a>
         <a href="/jet/docs/training-history">Training history</a>
         <a href="https://github.com/quaedra/jet">GitHub</a>
-        <a href="https://huggingface.co/michaljach/jet-4b">Weights</a>
+        <a href="https://huggingface.co/quaedra/jet">Weights</a>
       </nav>
       <div class="kv">
         <div><b>Jet-4B</b><span>Latest model, v6.2</span></div>
@@ -58,12 +58,6 @@
       <p class="note" style="margin-top:0">Decision Index skill score per area.</p>
       <div class="chart" id="di-areas"></div>
       <p class="note">Strongest at tools and retrieval, weakest at knowledge and reasoning. Calibration: 66% accurate at 80% mean confidence (ECE 0.14), so confidences run high.</p>
-
-      <h3>v6.1 → v6.2 on the local holdout</h3>
-      <p class="note" style="margin-top:0">914 fixed cases, full merged BF16 weights.</p>
-      <div class="chart" id="v62"></div>
-      <div class="legend"><span><i style="background:var(--s1)"></i>v6.1</span><span><i style="background:var(--s2)"></i>v6.2</span></div>
-      <p class="note">Small changes; not statistically significant. Financial sentiment measures SEntFiN transfer, not FinEntity.</p>
     </section>
 
     <section>
@@ -85,7 +79,7 @@
     <section>
       <h2 class="mono" id="run-it">Run it</h2>
       <p>The v6.2 release is self-contained: merged bf16 weights plus the CUDA runtime.</p>
-<pre>hf download michaljach/jet-4b --revision v6.2.0 --local-dir jet-4b
+<pre>hf download quaedra/jet --revision v6.2.0 --local-dir jet-4b
 cd jet-4b &amp;&amp; python -m pip install -r requirements.txt
 echo '{"state":"I was charged twice this month.",
   "questions":{"billing":{"type":"noul",
@@ -144,20 +138,7 @@ echo '{"state":"I was charged twice this month.",
       fmt: (v, val) => (val ? v.toFixed(1) : String(v)),
     });
 
-    // releases/jet-v6.2/evaluation.json
-    barChart(document.getElementById("v62"), {
-      rows: [
-        { label: "Retention acc.", values: [93.40, 93.40] },
-        { label: "Banking acc.", values: [74.68, 74.68] },
-        { label: "Entity sent. F1", values: [71.16, 71.21] },
-        { label: "Sarcasm F1", values: [46.81, 50.00] },
-      ],
-      series: [{ name: "v6.1", color: "var(--s1)" }, { name: "v6.2", color: "var(--s2)" }],
-      min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
-      fmt: (v, val) => (val ? v.toFixed(1) : String(v)),
-    });
-
-    // Recorded golden cases (michaljach/jet-4b @ 25ccbd9e, golden.json)
+    // Recorded golden cases (quaedra/jet @ 25ccbd9e, golden.json)
     const cases = await (await fetch("/data/jet-examples.json")).json();
     const titles = {
       choice_dbpedia_0: "Entity type", choice_ag_news_2: "News topic", list_state: "Agent next step",

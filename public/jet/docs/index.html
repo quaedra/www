@@ -23,7 +23,7 @@
         <a href="/jet/docs/decision-index">Decision Index</a>
         <a href="/jet/docs/training-history">Training history</a>
         <a href="https://github.com/quaedra/jet">GitHub</a>
-        <a href="https://huggingface.co/michaljach/jet-4b">Weights</a>
+        <a href="https://huggingface.co/quaedra/jet">Weights</a>
       </nav>
     </header>
 
@@ -32,11 +32,6 @@
 typed questions; it returns choices, scores, and probabilities without generating
 free-form text. Answers always follow the requested type, but decisions can still
 be wrong.</p>
-<p><a href="https://quaedra.com/jet">Website</a> ·
-<a href="https://quaedra.com/jet/docs/">Docs</a> ·
-<a href="https://huggingface.co/michaljach/jet-4b">Model weights</a> ·
-<a href="/jet/docs/training-history">Training history</a> ·
-<a href="https://github.com/quaedra/jet/blob/main/experiments/jet-focused-20260925/README.md">Training run records</a></p>
 <table class="data">
 <thead>
 <tr>
@@ -65,7 +60,7 @@ be wrong.</p>
 <p><strong>Jet-4B v6.2 (Linux + NVIDIA CUDA).</strong> The Hugging Face release is self-contained: it
 ships the merged bf16 weights with the runtime from <a href="https://github.com/quaedra/jet/tree/main/releases/jet-v6.2/"><code>releases/jet-v6.2/</code></a> and
 <code>src/format.py</code> / <code>src/inference.py</code>.</p>
-<pre><code>hf download michaljach/jet-4b --revision v6.2.0 --local-dir jet-4b
+<pre><code>hf download quaedra/jet --revision v6.2.0 --local-dir jet-4b
 cd jet-4b
 python -m pip install -r requirements.txt
 echo '{"state":"I was charged twice this month.","questions":{"billing":{"type":"noul","instructions":"Is this a billing issue?"}}}' | python jet.py</code></pre>
@@ -76,7 +71,7 @@ one is kept in the model repository&#39;s history at revision <code>25ccbd9e</co
 cd jet
 uv sync                  # Apple Silicon / Metal
 # Linux with NVIDIA: uv sync --extra cuda
-hf download michaljach/jet-4b --revision 25ccbd9e09c75643b3c2214e2b2522bec39171a7 --local-dir models/jet-0.6b
+hf download quaedra/jet --revision 25ccbd9e09c75643b3c2214e2b2522bec39171a7 --local-dir models/jet-0.6b
 JET_API_KEY=secret uv run jet-serve --base-model models/jet-0.6b</code></pre>
 <pre><code>curl http://localhost:8000/v1/decide \
   -H 'Authorization: Bearer secret' \

@@ -59,8 +59,9 @@ for (const page of pages) {
     },
   });
 
-  // The page title comes from the template, not the document's own H1.
-  const body = marked.parse(markdown.replace(/^# .*\n+/, ""));
+  // The page title comes from the template, not the document's own H1, and the site menu replaces
+  // the README's row of links (Website · Docs · …).
+  const body = marked.parse(markdown.replace(/^# .*\n+/, "").replace(/^\[Website\]\([^\n]*(?:\n\[[^\n]*)*\n+/m, ""));
   writeFileSync(join(out, page.slug ? `${page.slug}.html` : "index.html"), render(page, body, usesMermaid));
   console.log(`${page.source} → ${url(page)}`);
 }
@@ -96,7 +97,7 @@ function render(page, body, usesMermaid) {
       ? `<a href="${url(other)}" aria-current="page">${other.title}</a>`
       : `<a href="${url(other)}">${other.title}</a>`),
     `<a href="${github}">GitHub</a>`,
-    `<a href="https://huggingface.co/michaljach/jet-4b">Weights</a>`,
+    `<a href="https://huggingface.co/quaedra/jet">Weights</a>`,
   ].join("\n        ");
   const title = `${page.title} · Jet`;
   return `<!doctype html>

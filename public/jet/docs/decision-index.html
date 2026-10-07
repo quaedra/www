@@ -23,7 +23,7 @@
         <a href="/jet/docs/decision-index" aria-current="page">Decision Index</a>
         <a href="/jet/docs/training-history">Training history</a>
         <a href="https://github.com/quaedra/jet">GitHub</a>
-        <a href="https://huggingface.co/michaljach/jet-4b">Weights</a>
+        <a href="https://huggingface.co/quaedra/jet">Weights</a>
       </nav>
     </header>
 
@@ -114,12 +114,12 @@ partial diagnostics, not official scores.</p>
 </thead>
 <tbody><tr>
 <td><code>decision_index_torch:TorchJetEngine</code></td>
-<td>Jet-4B: <code>michaljach/jet-4b</code> merged weights, or <code>Qwen/Qwen3.5-4B</code> plus an adapter</td>
+<td>Jet-4B: <code>quaedra/jet</code> merged weights, or <code>Qwen/Qwen3.5-4B</code> plus an adapter</td>
 <td>PyTorch, CUDA</td>
 </tr>
 <tr>
 <td><code>decision_index_engine:JetEngine</code></td>
-<td>Jet 0.6B releases (v5 and earlier), default <code>michaljach/jet-4b</code> revision <code>25ccbd9e</code> (V5)</td>
+<td>Jet 0.6B releases (v5 and earlier), default <code>quaedra/jet</code> revision <code>25ccbd9e</code> (V5)</td>
 <td>MLX (Metal, or CUDA on Linux)</td>
 </tr>
 <tr>
@@ -143,7 +143,7 @@ uv sync --extra benchmark --inexact
 uv run --no-sync python -m decision_index run --engine decision_index_torch:TorchJetEngine \
   --rows artifacts/decision-index/diagnostic/compatibility.jsonl.gz \
   --out artifacts/decision-index/runs/compatibility-v6 \
-  --option model=michaljach/jet-4b --option revision=e5b8f610ddb92ffaba596ae452bed32a9fef49ca \
+  --option model=quaedra/jet --option revision=e5b8f610ddb92ffaba596ae452bed32a9fef49ca \
   --option max_tokens=8192
 
 # Qwen3-0.6B releases with MLX on CUDA (the launcher sets up CUDA headers)
