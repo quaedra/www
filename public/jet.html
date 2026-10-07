@@ -21,7 +21,6 @@
         <a href="/jet/docs/">Docs</a>
         <a href="https://github.com/quaedra/jet">GitHub</a>
         <a href="https://huggingface.co/michaljach/jet">Weights</a>
-        <a href="https://huggingface.co/spaces/michaljach/jet">HF Space</a>
         <a href="/jet/docs/training-history">Training history</a>
       </p>
       <div class="kv">
@@ -77,11 +76,11 @@
         </div>
         <details class="table" style="margin-top:12px"><summary>Response JSON</summary><pre id="jet-json"></pre></details>
       </div>
-      <p class="note">For live inference, run the model locally or start the <a href="https://huggingface.co/spaces/michaljach/jet">Hugging Face Space</a>, which serves the earlier 0.6B release and may be paused on free hosting.</p>
+      <p class="note">For live inference, run the model locally; see <a href="#run-it">Run it</a>.</p>
     </section>
 
     <section>
-      <h2 class="mono">Run it</h2>
+      <h2 class="mono" id="run-it">Run it</h2>
       <p>The v6.2 release is self-contained: merged bf16 weights plus the CUDA runtime.</p>
 <pre>hf download michaljach/jet --revision v6.2.0 --local-dir jet
 cd jet &amp;&amp; python -m pip install -r requirements.txt
