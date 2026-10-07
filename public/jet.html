@@ -18,15 +18,16 @@
       <h1>Jet</h1>
       <p class="lede">A typed decision model. Give it a state and named questions; it returns choices, scores and probabilities, never free-form text.</p>
       <p class="links mono">
+        <a href="/jet/docs/">Docs</a>
         <a href="https://github.com/quaedra/jet">GitHub</a>
         <a href="https://huggingface.co/michaljach/jet">Weights</a>
         <a href="https://huggingface.co/spaces/michaljach/jet">HF Space</a>
-        <a href="https://github.com/quaedra/jet/blob/main/TRAINING_HISTORY.md">Training history</a>
+        <a href="/jet/docs/training-history">Training history</a>
       </p>
       <div class="kv">
         <div><b>v6.2</b><span>Latest release</span></div>
         <div><b>Qwen3.5-4B</b><span>Base model, rank-16 LoRA</span></div>
-        <div><b>16,384</b><span>Max prompt tokens</span></div>
+        <div><b>40.0</b><span>Decision Index 0.3, #52 of 113</span></div>
       </div>
     </header>
 
@@ -45,11 +46,16 @@
 
     <section>
       <h2 class="mono">Benchmarks</h2>
-      <h3>Jet v6.1 vs. Kev 8B, percentage points</h3>
-      <p class="note" style="margin-top:0">Difference from the archived Decision Index 0.1 reference score on 21 benchmarks where the metric and case count match.</p>
-      <div class="chart" id="vs-kev"></div>
-      <p class="note">Development evaluation of the v6.1 step-2,000 adapter before its BF16 merge, not v6.2. Kev figures are archived published scores, not a new local run. Matching counts do not prove identical cases. No official overall Decision Index has been measured for Jet. <a href="https://github.com/quaedra/jet/blob/main/experiments/jet-kev-comparison-20260925/results.md">Full report</a></p>
-      <details class="table"><summary>Show as table</summary><table class="data" id="vs-kev-table"></table></details>
+      <h3>Decision Index 0.3</h3>
+      <p class="note" style="margin-top:0">The official leaderboard, run by its maintainers on the full suite: 110,201 requests across 42 benchmarks, published October 7, 2026. Qwen3.5-4B models shown; Jet v6.2 scores 40.01, rank 52 of 113.</p>
+      <div class="chart" id="di"></div>
+      <p class="note">The index weights public benchmarks 20%, same skills 50% and new domains 30%, after equating each part across models. Scores within 0.9 points are tied, as Jet is with its neighbors. Jet answered 109,958 requests; 243 exceed its 16,384-token prompt limit. <a href="/jet/docs/decision-index">Details</a> · <a href="https://huggingface.co/spaces/multimodalart/jev-decision-index">Leaderboard</a></p>
+      <details class="table"><summary>Show as table</summary><table class="data" id="di-table"></table></details>
+
+      <h3>Jet v6.2 by area</h3>
+      <p class="note" style="margin-top:0">Decision Index skill score per area.</p>
+      <div class="chart" id="di-areas"></div>
+      <p class="note">Strongest at tools and retrieval, weakest at knowledge and reasoning. Calibration: 66% accurate at 80% mean confidence (ECE 0.14), so confidences run high.</p>
 
       <h3>v6.1 → v6.2 on the local holdout</h3>
       <p class="note" style="margin-top:0">914 fixed cases, full merged BF16 weights.</p>
@@ -98,31 +104,43 @@ echo '{"state":"I was charged twice this month.",
   <script type="module">
     import { barChart, probBars } from "./charts.js";
 
-    // experiments/jet-kev-comparison-20260925/results.md — complete rows with matching metric/count
-    const kev = [
-      ["VAST", 47.58, 47.04], ["CRUXEval", 44.04, 44.04], ["Habermas Machine", 44.51, 41.71],
-      ["Amazon ESCI", 52.86, 40.23], ["GPQA Diamond", 43.88, 33.16], ["MuSR", 56.91, 54.79],
-      ["GSM8K", 70.13, 41.17], ["CLadder", 65.70, 59.94], ["BFCL", 91.97, 88.55],
-      ["SGD/SGD-X", 64.03, 58.88], ["BANKING77", 75.14, 82.66], ["CLINC150+OOS", 91.08, 76.79],
-      ["ANLI", 62.18, 49.31], ["WinoGrande", 71.03, 68.51], ["HellaSwag", 92.82, 79.50],
-      ["NLI4CT", 77.17, 70.35], ["ContractNLI", 76.82, 48.52], ["BPoMP", 82.86, 74.00],
-      ["Humicroedit", 60.08, 55.90], ["cfcolor", 64.36, 57.62], ["FinEntity", 80.80, 86.75],
+    // Decision Index 0.3 leaderboard (multimodalart/jev-decision-index, data/v03.json, 2026-10-07)
+    const di = [
+      ["Hopper (G) 1.2", 42.61, 41.15, 42.37, 39.61],
+      ["JPT-4B", 41.63, 42.82, 40.11, 39.17],
+      ["Jet v6.2", 40.01, 42.17, 40.93, 34.46],
+      ["Kev 4B r10", 39.50, 37.95, 36.17, 41.25],
+      ["InternLM Intern-Decision", 38.21, 38.00, 39.10, 34.35],
+      ["Interfaze lev", 36.53, 39.20, 37.20, 31.98],
+      ["Together Tev1", 34.14, 29.51, 31.78, 37.65],
+      ["Jobe", 33.06, 32.93, 34.34, 30.08],
+      ["Qwen3.5-4B Base (SemIf)", 28.84, 26.50, 28.04, 30.68],
     ];
-    const rows = kev.map(([n, j, k]) => ({ n, j, k, d: +(j - k).toFixed(2) })).sort((a, b) => b.d - a.d);
-    const signed = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
-    barChart(document.getElementById("vs-kev"), {
-      rows: rows.map((r) => ({
-        label: r.n, values: [r.d],
-        tip: `<b>${r.n}</b><br>Jet v6.1: ${r.j.toFixed(2)}<br>Kev 8B: ${r.k.toFixed(2)}<br>Difference: ${signed(r.d)} pp`,
+    barChart(document.getElementById("di"), {
+      rows: di.map(([n, v, pub, same, fresh]) => ({
+        label: n, values: [v], color: n.startsWith("Jet") ? "var(--s2)" : undefined,
+        tip: `<b>${n}</b><br>Index: ${v.toFixed(2)}<br>Public: ${pub.toFixed(2)}<br>Same skills: ${same.toFixed(2)}<br>New domains: ${fresh.toFixed(2)}`,
       })),
-      series: [{ name: "Difference", color: "var(--s1)" }],
-      min: -10, max: 30, ticks: [-10, 0, 10, 20, 30], diverging: true,
-      fmt: (v, val) => (val ? signed(v) : String(v)),
+      series: [{ name: "Index", color: "var(--s1)" }],
+      min: 0, max: 50, ticks: [0, 10, 20, 30, 40, 50],
+      fmt: (v, val) => (val ? v.toFixed(1) : String(v)),
     });
-    document.getElementById("vs-kev-table").innerHTML =
-      "<thead><tr><th>Benchmark</th><th class='n'>Jet v6.1</th><th class='n'>Kev 8B</th><th class='n'>Δ pp</th></tr></thead><tbody>" +
-      rows.map((r) => `<tr><td>${r.n}</td><td class="n">${r.j.toFixed(2)}</td><td class="n">${r.k.toFixed(2)}</td><td class="n">${signed(r.d)}</td></tr>`).join("") +
+    document.getElementById("di-table").innerHTML =
+      "<thead><tr><th>Model</th><th class='n'>Index</th><th class='n'>Public</th><th class='n'>Same skills</th><th class='n'>New domains</th></tr></thead><tbody>" +
+      di.map(([n, ...v]) => `<tr><td>${n}</td>${v.map((x) => `<td class="n">${x.toFixed(2)}</td>`).join("")}</tr>`).join("") +
       "</tbody>";
+    barChart(document.getElementById("di-areas"), {
+      rows: [
+        { label: "Tools & Automation", values: [62.94] },
+        { label: "Retrieval & Classification", values: [48.17] },
+        { label: "Language Understanding", values: [44.21] },
+        { label: "Arts & Human Taste", values: [30.23] },
+        { label: "Knowledge & Reasoning", values: [25.42] },
+      ],
+      series: [{ name: "Skill score", color: "var(--s1)" }],
+      min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
+      fmt: (v, val) => (val ? v.toFixed(1) : String(v)),
+    });
 
     // releases/jet-v6.2/evaluation.json
     barChart(document.getElementById("v62"), {

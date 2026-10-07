@@ -23,7 +23,7 @@ const hideTip = () => (tip.style.display = "none");
 
 /**
  * opts: {
- *   rows: [{ label, values: number[], tip?: string }],
+ *   rows: [{ label, values: number[], tip?: string, color?: string }],   // color: this row's bars
  *   series: [{ name, color }],     // one entry per value; colors are CSS values
  *   min, max, ticks: number[], fmt: v => string,
  *   diverging?: bool                // color by sign: series[0] positive, negColor negative
@@ -67,7 +67,7 @@ export function barChart(container, opts) {
         const end = sx(v);
         const left = Math.min(base, end);
         const w = Math.max(2, Math.abs(end - base));
-        const color = diverging ? (v < 0 ? negColor : series[0].color) : series[j].color;
+        const color = r.color ?? (diverging ? (v < 0 ? negColor : series[0].color) : series[j].color);
         el("rect", { x: left, y: by, width: w, height: barH, rx: Math.min(3, w / 2), fill: color }, g);
         const vt = el("text", {
           class: "v",

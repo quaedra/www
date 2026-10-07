@@ -1,0 +1,157 @@
+// Builds Jet's documentation pages (public/jet/docs/) from the Markdown in the Jet repository,
+// in the site's own style.
+//
+//   npm run docs                      # reads ../jet
+//   JET_REPO=/path/to/jet npm run docs
+//
+// The generated pages are committed, so deploying the site doesn't need the Jet repository.
+// Links to the pages built here stay on quaedra.com; links to other files in the repository
+// (experiment reports, release files) go to GitHub; images are copied in.
+
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join, normalize, posix } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Marked } from "marked";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const repo = process.env.JET_REPO ?? join(root, "..", "jet");
+const out = join(root, "public", "jet", "docs");
+const github = "https://github.com/quaedra/jet";
+
+/** Repository file → page. Order is the docs navigation. */
+const pages = [
+  { source: "README.md", slug: "", title: "Overview", description: "Jet's prompt format, local runtime, training pipeline and project layout." },
+  { source: "docs/decision-index.md", slug: "decision-index", title: "Decision Index", description: "Jet's official Decision Index 0.3 result and how to run the benchmark yourself." },
+  { source: "TRAINING_HISTORY.md", slug: "training-history", title: "Training history", description: "Every Jet release from the first Qwen3-0.6B runs to v6.2 on Qwen3.5-4B." },
+];
+const pageBySource = new Map(pages.map((page) => [page.source, page]));
+const url = (page) => `/jet/docs/${page.slug}`;
+
+if (!existsSync(join(repo, "README.md"))) {
+  console.error(`No Jet repository at ${repo}. Set JET_REPO.`);
+  process.exit(1);
+}
+rmSync(out, { recursive: true, force: true });
+mkdirSync(join(out, "assets"), { recursive: true });
+
+for (const page of pages) {
+  const markdown = readFileSync(join(repo, page.source), "utf8");
+  const sourceDir = posix.dirname(page.source);
+  let usesMermaid = false;
+
+  const marked = new Marked({
+    gfm: true,
+    renderer: {
+      code({ text, lang }) {
+        if (lang === "mermaid") {
+          usesMermaid = true;
+          return `<pre class="mermaid">${escape(text)}</pre>\n`;
+        }
+        return `<pre><code>${escape(text)}</code></pre>\n`;
+      },
+      table(token) {
+        return this.constructor.prototype.table.call(this, token).replace("<table>", '<table class="data">');
+      },
+    },
+    walkTokens(token) {
+      if (token.type === "link") token.href = rewriteLink(token.href, sourceDir);
+      if (token.type === "image") token.href = copyImage(token.href, sourceDir);
+    },
+  });
+
+  // The page title comes from the template, not the document's own H1.
+  const body = marked.parse(markdown.replace(/^# .*\n+/, ""));
+  writeFileSync(join(out, page.slug ? `${page.slug}.html` : "index.html"), render(page, body, usesMermaid));
+  console.log(`${page.source} → ${url(page)}`);
+}
+
+/** Links to built pages stay here; other repository paths go to GitHub. */
+function rewriteLink(href, sourceDir) {
+  if (/^([a-z]+:|#|\/)/i.test(href)) return href;
+  const [path, hash = ""] = href.split("#");
+  const resolved = normalize(posix.join(sourceDir, path)).replace(/\\/g, "/").replace(/^\.\//, "");
+  const page = pageBySource.get(resolved);
+  if (page) return url(page) + (hash ? `#${hash}` : "");
+  const kind = path.endsWith("/") || !posix.extname(resolved) ? "tree" : "blob";
+  return `${github}/${kind}/main/${resolved}${hash ? `#${hash}` : ""}`;
+}
+
+function copyImage(href, sourceDir) {
+  if (/^[a-z]+:/i.test(href)) return href;
+  const resolved = normalize(posix.join(sourceDir, href));
+  const name = resolved.replace(/[\\/]/g, "-");
+  copyFileSync(join(repo, resolved), join(out, "assets", name));
+  return `/jet/docs/assets/${name}`;
+}
+
+function escape(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function render(page, body, usesMermaid) {
+  const nav = pages
+    .map((other) => other === page
+      ? `<a href="${url(other)}" aria-current="page">${other.title}</a>`
+      : `<a href="${url(other)}">${other.title}</a>`)
+    .join("\n        ");
+  const title = page.slug ? `${page.title} · Jet docs` : "Jet docs";
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title} · Quaedra Research</title>
+  <meta name="description" content="${page.description}">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Generated by scripts/build-jet-docs.mjs from ${github}/blob/main/${page.source}. Edit the source, then run npm run docs. -->
+  <div class="wrap page">
+    <header>
+      <p class="crumb mono"><a href="/"><svg class="glyph" viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</a> / <a href="/jet">Jet</a> / Docs</p>
+      <h1>${page.slug ? page.title : "Jet docs"}</h1>
+      <nav class="links docs-nav mono">
+        ${nav}
+        <a href="${github}/blob/main/${page.source}">Source</a>
+      </nav>
+    </header>
+
+    <article class="doc">
+${body}
+    </article>
+
+    <footer class="mono">
+      <span>© <span id="y">2026</span> Quaedra Research</span>
+      <nav>
+        <a href="/contact">Contact</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://github.com/quaedra">GitHub</a>
+      </nav>
+    </footer>
+  </div>
+  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>${usesMermaid ? `
+  <script type="module">
+    // Diagrams in the site's colors, light or dark.
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    const css = getComputedStyle(document.documentElement);
+    const v = (name) => css.getPropertyValue(name).trim();
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      fontFamily: "Inter, system-ui, sans-serif",
+      themeVariables: {
+        background: v("--bg"), primaryColor: v("--surface"), primaryTextColor: v("--fg"),
+        primaryBorderColor: v("--line"), lineColor: v("--muted"), textColor: v("--fg"),
+        clusterBkg: "transparent", clusterBorder: v("--line"), edgeLabelBackground: v("--bg"), fontSize: "13px",
+      },
+    });
+  </script>` : ""}
+</body>
+</html>
+`;
+}
