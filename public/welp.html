@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welp · Quaedra Research</title>
+  <meta name="description" content="Welp-35B-A3B is a ternary build of a 35B mixture-of-experts model that runs on a 16 GB GPU with 262k context.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="wrap page">
+    <header>
+      <a class="crumb mono" href="/"><svg class="glyph" viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</a>
+      <h1>Welp</h1>
+      <p class="lede">Welp-35B-A3B is a mixture-of-experts model with its experts quantized to ternary weights, so it runs entirely on a 16 GB GPU with a 262k context.</p>
+      <nav class="links mono" aria-label="Welp">
+        <a href="/welp" aria-current="page">Overview</a>
+        <a href="#benchmarks">Benchmarks</a>
+        <a href="#run-it">Run it</a>
+      </nav>
+      <div class="kv">
+        <div><b>9.4 GB</b><span>GGUF file</span></div>
+        <div><b>13.3 GB</b><span>VRAM at 262k context</span></div>
+        <div><b>90.9%</b><span>HumanEval pass@1</span></div>
+      </div>
+    </header>
+
+    <section>
+      <h2 class="mono">How it works</h2>
+      <p>Welp is post-training quantization only: no fine-tuning and no new capabilities. The routed experts, most of the model's weights, are stored as ternary weights (PTQ1_0, 1.75 bits per weight). Each expert is fitted to minimize its output error, then refined layer by layer with GPTQ and block-wise scale tuning. The expert down-projections are kept at Q2_K and everything outside the experts at Q4_K.</p>
+      <table class="data">
+        <thead><tr><th>Build</th><th class="n">File</th><th class="n">VRAM at 262k</th><th>Experts</th></tr></thead>
+        <tbody>
+          <tr><td>Welp 9.4 GB</td><td class="n">9.4 GB</td><td class="n">13.3 GB</td><td>gate/up ternary, down Q2_K</td></tr>
+          <tr><td>Welp 8.2 GB</td><td class="n">8.2 GB</td><td class="n">12.2 GB</td><td>all ternary</td></tr>
+        </tbody>
+      </table>
+      <p class="note aside">Quantized from Qwen3.6-35B-A3B (35B total, 3B active, 256 experts, top-8). VRAM measured with a q8_0 KV cache, including about 0.8 GB used by the desktop.</p>
+    </section>
+
+    <section>
+      <h2 class="mono" id="benchmarks">Benchmarks</h2>
+      <h3>HumanEval pass@1</h3>
+      <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model.</p>
+      <div class="chart" id="he"></div>
+      <table class="data">
+        <thead><tr><th>Model</th><th class="n">File</th><th class="n">Wikitext PPL</th><th class="n">Long-exact</th><th class="n">Decode</th></tr></thead>
+        <tbody>
+          <tr><td><b>Welp-35B-A3B 9.4 GB</b></td><td class="n">9.4 GB</td><td class="n">6.39</td><td class="n">14/37</td><td class="n">197 tok/s</td></tr>
+          <tr><td>IQ2_XXS (Unsloth)</td><td class="n">9.1 GB</td><td class="n">7.83</td><td class="n">5/37</td><td class="n">212 tok/s</td></tr>
+          <tr><td>UD-IQ3_XXS (Unsloth)</td><td class="n">13.2 GB</td><td class="n">5.87</td><td class="n">–</td><td class="n">169 tok/s</td></tr>
+          <tr><td>Q4_K_M</td><td class="n">21.2 GB</td><td class="n">5.62</td><td class="n">–</td><td class="n">–</td></tr>
+          <tr><td>Bonsai 2 27B</td><td class="n">–</td><td class="n">–</td><td class="n">17/37*</td><td class="n">83 tok/s</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Single runs on an RTX 4080 Super (16 GB). Perplexity on wikitext-2 at 2,048-token context (lower is better); decode is llama-bench tg128. Q4_K_M doesn't fit in 16 GB, and UD-IQ3_XXS fits only up to a 131k context. Bonsai 2 runs without multi-token prediction. *Bonsai's long-exact score is from the bonsai-ada-surgery report, measured on an RTX 4070, not re-run here.</p>
+      <p>At the same size, Welp beats 2-bit quantization on every quality measure here, at slightly lower speed. It is about level with Bonsai 2 27B on quality at more than twice the speed, and the larger UD-IQ3_XXS still scores higher on a 16 GB card.</p>
+    </section>
+
+    <section>
+      <h2 class="mono" id="run-it">Run it</h2>
+      <p>Welp is a research build and hasn't been released. It needs PrismML's llama.cpp fork, which adds the ternary format, plus a local patch.</p>
+<pre>llama-server -m welp-9.4g.gguf -ngl 99 -fa on -c 262144 \
+  -ctk q8_0 -ctv q8_0 --jinja</pre>
+    </section>
+
+    <footer class="mono">
+      <span>© <span id="y">2026</span> Quaedra Research</span>
+      <nav>
+        <a href="contact.html">Contact</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/quaedra">GitHub</a>
+      </nav>
+    </footer>
+  </div>
+  </div>
+  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+  <script type="module">
+    import { barChart } from "/charts.js";
+
+    // RTX 4080 Super, same HumanEval harness (164 problems, thinking off, temperature 0)
+    const he = [
+      ["Q4_K_M (21.2 GB)", 95.7], ["UD-IQ3_XXS (13.2 GB)", 93.9], ["Bonsai 2 27B", 91.5],
+      ["Welp-35B-A3B (9.4 GB)", 90.9], ["IQ2_XXS (9.1 GB)", 84.8],
+    ];
+    barChart(document.getElementById("he"), {
+      rows: he.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
+      series: [{ name: "pass@1", color: "var(--s1)" }],
+      min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
+      fmt: (v, val) => (val ? v.toFixed(1) + (val ? "%" : "") : String(v)),
+    });
+  </script>
+</body>
+</html>
