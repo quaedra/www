@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "quaedra-www",
+  "account_id": "24448fc5d4c7726e7ed1cdfda7a4dacd",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [
+    { "pattern": "quaedra.com", "custom_domain": true },
+    { "pattern": "www.quaedra.com", "custom_domain": true }
+  ]
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quaedra Research</title>
+  <meta name="description" content="Quaedra Research builds decision and language models.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="mark" aria-hidden="true"></span>
+      <h1>Quaedra Research</h1>
+      <p class="lede">We build compact, capable models for reasoning and decision-making.</p>
+    </header>
+
+    <section>
+      <h2 class="mono">Models</h2>
+      <ul>
+        <li>
+          <span class="name">JET</span>
+          <span class="status mono live">Released</span>
+          <span class="desc">A decision model.</span>
+        </li>
+        <li>
+          <span class="name">Hestrel</span>
+          <span class="status mono live">Released</span>
+          <span class="desc">A Quaedra model.</span>
+        </li>
+        <li>
+          <span class="name">Welp</span>
+          <span class="status mono training">Training</span>
+          <span class="desc">Built on Qwen 36B, aimed at the Bonsai 2 class.</span>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="mono">
+      <span>© <span id="y">2026</span> Quaedra Research</span>
+      <nav>
+        <a href="contact.html">Contact</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/quaedra">GitHub</a>
+      </nav>
+    </footer>
+  </div>
+  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+</body>
+</html>
