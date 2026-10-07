@@ -47,6 +47,9 @@
       <h3>HumanEval pass@1</h3>
       <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model.</p>
       <div class="chart" id="he"></div>
+      <h3>Decode speed</h3>
+      <p class="note" style="margin-top:0">Tokens per second, llama-bench tg128 on the same RTX 4080 Super. Q4_K_M doesn't fit in 16 GB, so it isn't measured; Bonsai 2 runs without multi-token prediction.</p>
+      <div class="chart" id="speed"></div>
       <table class="data">
         <thead><tr><th>Model</th><th class="n">File</th><th class="n">Wikitext PPL</th><th class="n">Long-exact</th><th class="n">Decode</th></tr></thead>
         <tbody>
@@ -93,6 +96,17 @@
       series: [{ name: "pass@1", color: "var(--s1)" }],
       min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
       fmt: (v, val) => (val ? v.toFixed(1) + (val ? "%" : "") : String(v)),
+    });
+
+    // llama-bench tg128, RTX 4080 Super (16 GB)
+    const speed = [
+      ["IQ2_XXS (9.1 GB)", 212], ["Welp-35B-A3B (9.4 GB)", 197], ["UD-IQ3_XXS (13.2 GB)", 169], ["Bonsai 2 27B", 83],
+    ];
+    barChart(document.getElementById("speed"), {
+      rows: speed.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
+      series: [{ name: "tok/s", color: "var(--s1)" }],
+      min: 0, max: 250, ticks: [0, 50, 100, 150, 200, 250],
+      fmt: (v) => String(v),
     });
   </script>
 </body>
