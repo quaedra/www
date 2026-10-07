@@ -44,12 +44,12 @@
 
     <section>
       <h2 class="mono" id="benchmarks">Benchmarks</h2>
-      <h3>HumanEval pass@1</h3>
-      <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model.</p>
-      <div class="chart" id="he"></div>
       <h3>Decode speed</h3>
       <p class="note" style="margin-top:0">Tokens per second, llama-bench tg128 on the same RTX 4080 Super. Q4_K_M doesn't fit in 16 GB, so it isn't measured; Bonsai 2 runs without multi-token prediction.</p>
       <div class="chart" id="speed"></div>
+      <h3>HumanEval pass@1</h3>
+      <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model.</p>
+      <div class="chart" id="he"></div>
       <table class="data">
         <thead><tr><th>Model</th><th class="n">File</th><th class="n">Wikitext PPL</th><th class="n">Long-exact</th><th class="n">Decode</th></tr></thead>
         <tbody>
