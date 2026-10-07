@@ -9,6 +9,7 @@
   --s2: #eb6834;
   --neg: #e34948;
   --grid: #e4e4e7;
+  --logo: #1d302b;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -22,6 +23,7 @@
     --s2: #d95926;
     --neg: #e66767;
     --grid: #26262a;
+    --logo: #f4f4f5;
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,12 +43,12 @@ body {
 }
 .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; }
 header .mark {
-  display: inline-block;
-  width: 14px; height: 14px;
-  border: 1.5px solid var(--fg);
-  transform: rotate(45deg);
+  display: block;
+  width: 36px; height: 31px;
+  color: var(--logo);
   margin-bottom: 40px;
 }
+.crumb .glyph { width: 15px; height: 13px; color: var(--logo); vertical-align: -2px; margin-right: 8px; }
 h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; }
 .lede { color: var(--muted); margin-top: 12px; max-width: 46ch; }
 section { margin-top: 80px; }
