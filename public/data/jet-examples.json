@@ -1,0 +1,405 @@
+[
+ {
+  "name": "choice_dbpedia_0",
+  "state": "Die Feststellung\nDie Feststellung is an East German film. It was released in 1958.",
+  "question": {
+   "type": "choice",
+   "instructions": "What kind of entity is described?",
+   "criteria": {
+    "OfficeHolder": "a politician or office holder",
+    "Plant": "a plant",
+    "Company": "a company or business",
+    "Film": "a film",
+    "NaturalPlace": "a natural place such as a mountain, river or lake",
+    "Artist": "an artist or musician",
+    "MeanOfTransportation": "a vehicle, ship, aircraft or other means of transportation",
+    "EducationalInstitution": "a school, college or university"
+   }
+  },
+  "answer": {
+   "type": "choice",
+   "choice": "Film",
+   "probabilities": {
+    "OfficeHolder": 0.0027,
+    "Plant": 0.0023,
+    "Company": 0.0041,
+    "Film": 0.9779,
+    "NaturalPlace": 0.005,
+    "Artist": 0.0047,
+    "MeanOfTransportation": 0.002,
+    "EducationalInstitution": 0.0013
+   },
+   "confidence": 0.9292
+  },
+  "top": [
+   [
+    "Film",
+    0.9779
+   ],
+   [
+    "NaturalPlace",
+    0.005
+   ],
+   [
+    "Artist",
+    0.0047
+   ],
+   [
+    "Company",
+    0.0041
+   ],
+   [
+    "OfficeHolder",
+    0.0027
+   ]
+  ]
+ },
+ {
+  "name": "choice_ag_news_2",
+  "state": "Soyuz crew docks craft manually with international space station A US-Russian crew had to turn off autopilot yesterday and manually moor its Soyuz spacecraft to the international space station after an unidentified glitch resulted ",
+  "question": {
+   "type": "choice",
+   "instructions": "Classify the topic of this text.",
+   "criteria": {
+    "business": "business, markets, companies and the economy",
+    "sports": "sports, athletes, games and competitions",
+    "scitech": "science and technology",
+    "world": "world news, politics, international affairs"
+   }
+  },
+  "answer": {
+   "type": "choice",
+   "choice": "scitech",
+   "probabilities": {
+    "business": 0.003,
+    "sports": 0.0079,
+    "scitech": 0.9729,
+    "world": 0.0162
+   },
+   "confidence": 0.8923
+  }
+ },
+ {
+  "name": "list_state",
+  "state": [
+   "User: my build fails on ARM",
+   "Agent: which compiler?",
+   "User: clang 19, see log above"
+  ],
+  "question": {
+   "type": "choice",
+   "instructions": "What should the agent do next?",
+   "criteria": {
+    "ask_log": "ask for the full build log",
+    "close": "close the ticket",
+    "escalate": "hand to a human"
+   }
+  },
+  "answer": {
+   "type": "choice",
+   "choice": "ask_log",
+   "probabilities": {
+    "ask_log": 0.956,
+    "close": 0.0103,
+    "escalate": 0.0337
+   },
+   "confidence": 0.8138
+  }
+ },
+ {
+  "name": "choice_mnli_3",
+  "state": {
+   "premise": "The thrones on view here date from a visit by George V and Queen Mary in 1927.",
+   "hypothesis": "The thrones existed in 1927."
+  },
+  "question": {
+   "type": "choice",
+   "instructions": "How does the hypothesis relate to the premise?",
+   "criteria": {
+    "contradiction": "the hypothesis is definitely false given the premise",
+    "neutral": "the hypothesis might be true or false; the premise does not settle it",
+    "entailment": "the hypothesis is definitely true given the premise"
+   }
+  },
+  "answer": {
+   "type": "choice",
+   "choice": "entailment",
+   "probabilities": {
+    "contradiction": 0.0144,
+    "neutral": 0.0379,
+    "entailment": 0.9477
+   },
+   "confidence": 0.7852
+  }
+ },
+ {
+  "name": "choice_massive_5",
+  "state": "start my play list",
+  "question": {
+   "type": "choice",
+   "instructions": "What does the user want?",
+   "criteria": {
+    "recommendation_movies": "recommendation movies",
+    "music_likeness": "music likeness",
+    "general_joke": "general joke",
+    "lists_query": "lists query",
+    "calendar_query": "calendar query",
+    "cooking_query": "cooking query",
+    "datetime_convert": "datetime convert",
+    "general_quirky": "general quirky",
+    "email_sendemail": "email sendemail",
+    "play_music": "play music",
+    "alarm_set": "alarm set",
+    "audio_volume_up": "audio volume up",
+    "iot_hue_lightchange": "iot hue lightchange",
+    "email_querycontact": "email querycontact",
+    "qa_maths": "qa maths",
+    "news_query": "news query",
+    "iot_wemo_off": "iot wemo off",
+    "play_game": "play game",
+    "cooking_recipe": "cooking recipe",
+    "audio_volume_other": "audio volume other",
+    "audio_volume_down": "audio volume down",
+    "social_query": "social query",
+    "email_addcontact": "email addcontact",
+    "play_radio": "play radio",
+    "music_settings": "music settings",
+    "recommendation_locations": "recommendation locations",
+    "iot_coffee": "iot coffee",
+    "calendar_remove": "calendar remove",
+    "iot_hue_lightdim": "iot hue lightdim",
+    "qa_currency": "qa currency",
+    "transport_taxi": "transport taxi",
+    "play_audiobook": "play audiobook",
+    "iot_wemo_on": "iot wemo on",
+    "audio_volume_mute": "audio volume mute",
+    "transport_traffic": "transport traffic",
+    "qa_factoid": "qa factoid",
+    "datetime_query": "datetime query",
+    "transport_query": "transport query",
+    "qa_definition": "qa definition",
+    "email_query": "email query",
+    "recommendation_events": "recommendation events",
+    "iot_hue_lighton": "iot hue lighton",
+    "alarm_remove": "alarm remove",
+    "music_dislikeness": "music dislikeness",
+    "takeaway_query": "takeaway query",
+    "lists_createoradd": "lists createoradd",
+    "social_post": "social post",
+    "calendar_set": "calendar set",
+    "transport_ticket": "transport ticket",
+    "play_podcasts": "play podcasts",
+    "iot_hue_lightoff": "iot hue lightoff",
+    "iot_hue_lightup": "iot hue lightup",
+    "lists_remove": "lists remove",
+    "general_greet": "general greet",
+    "music_query": "music query",
+    "iot_cleaning": "iot cleaning",
+    "takeaway_order": "takeaway order",
+    "qa_stock": "qa stock",
+    "weather_query": "weather query",
+    "alarm_query": "alarm query"
+   }
+  },
+  "answer": {
+   "type": "choice",
+   "choice": "play_music",
+   "probabilities": {
+    "recommendation_movies": 0.0006,
+    "music_likeness": 0.0013,
+    "general_joke": 0.0005,
+    "lists_query": 0.0007,
+    "calendar_query": 0.0019,
+    "cooking_query": 0.0011,
+    "datetime_convert": 0.0007,
+    "general_quirky": 0.0007,
+    "email_sendemail": 0.0007,
+    "play_music": 0.9248,
+    "alarm_set": 0.0009,
+    "audio_volume_up": 0.001,
+    "iot_hue_lightchange": 0.0012,
+    "email_querycontact": 0.0005,
+    "qa_maths": 0.0009,
+    "news_query": 0.0003,
+    "iot_wemo_off": 0.0025,
+    "play_game": 0.0031,
+    "cooking_recipe": 0.003,
+    "audio_volume_other": 0.0022,
+    "audio_volume_down": 0.0025,
+    "social_query": 0.002,
+    "email_addcontact": 0.0014,
+    "play_radio": 0.0017,
+    "music_settings": 0.0046,
+    "recommendation_locations": 0.0026,
+    "iot_coffee": 0.0002,
+    "calendar_remove": 0.0012,
+    "iot_hue_lightdim": 0.0007,
+    "qa_currency": 0.0006,
+    "transport_taxi": 0.0002,
+    "play_audiobook": 0.0002,
+    "iot_wemo_on": 0.0003,
+    "audio_volume_mute": 0.0001,
+    "transport_traffic": 0.0002,
+    "qa_factoid": 0.0066,
+    "datetime_query": 0.0004,
+    "transport_query": 0.0015,
+    "qa_definition": 0.0003,
+    "email_query": 0.0009,
+    "recommendation_events": 0.0003,
+    "iot_hue_lighton": 0.0007,
+    "alarm_remove": 0.0002,
+    "music_dislikeness": 0.001,
+    "takeaway_query": 0.0015,
+    "lists_createoradd": 0.0032,
+    "social_post": 0.008,
+    "calendar_set": 0.0002,
+    "transport_ticket": 0.0003,
+    "play_podcasts": 0.0004,
+    "iot_hue_lightoff": 0.0014,
+    "iot_hue_lightup": 0.0004,
+    "lists_remove": 0.0015,
+    "general_greet": 0.0004,
+    "music_query": 0.0007,
+    "iot_cleaning": 0.0006,
+    "takeaway_order": 0.0012,
+    "qa_stock": 0.0005,
+    "weather_query": 0.0003,
+    "alarm_query": 0.0003
+   },
+   "confidence": 0.8684
+  },
+  "top": [
+   [
+    "play_music",
+    0.9248
+   ],
+   [
+    "social_post",
+    0.008
+   ],
+   [
+    "qa_factoid",
+    0.0066
+   ],
+   [
+    "music_settings",
+    0.0046
+   ],
+   [
+    "lists_createoradd",
+    0.0032
+   ]
+  ]
+ },
+ {
+  "name": "score_yelp_3",
+  "state": "This place is not a bad glorified fast food style eatery. There is a fair variety of items to choose from, however, the food can be hit or miss. Most recently I grabbed a burger and fries with a fountain drink. Fries were fresh and hot. Burger wasn't terrible but had too much of a char taste. It is a bit pricey for what is being offered as well. Burgers, fries and a drink hits just under $18.",
+  "question": {
+   "type": "score",
+   "instructions": "How positive is this review?",
+   "criteria": [
+    "very negative",
+    "negative",
+    "mixed or neutral",
+    "positive",
+    "very positive"
+   ]
+  },
+  "answer": {
+   "type": "score",
+   "score": 1.9423,
+   "level": "mixed or neutral",
+   "probabilities": [
+    0.009,
+    0.122,
+    0.7995,
+    0.0564,
+    0.013
+   ],
+   "confidence": 0.5671
+  }
+ },
+ {
+  "name": "score_stsb_6",
+  "state": {
+   "sentence_1": "A horse standing near a gate with another horse in the background.",
+   "sentence_2": "A group of river barges with trees in the background."
+  },
+  "question": {
+   "type": "score",
+   "instructions": "How similar in meaning are the two sentences?",
+   "criteria": [
+    "completely unrelated",
+    "different topics but share a few details",
+    "not equivalent but on the same topic",
+    "roughly equivalent, some important details differ",
+    "mostly equivalent, only minor details differ",
+    "completely equivalent in meaning"
+   ]
+  },
+  "answer": {
+   "type": "score",
+   "score": 0.2969,
+   "level": "completely unrelated",
+   "probabilities": [
+    0.7876,
+    0.1685,
+    0.0223,
+    0.0091,
+    0.0062,
+    0.0064
+   ],
+   "confidence": 0.6209
+  }
+ },
+ {
+  "name": "non_ascii_state",
+  "state": "東京の配達が三日遅れています。至急対応してください！ Merci d'avance — très urgent.",
+  "question": {
+   "type": "score",
+   "instructions": "How urgent is this message?",
+   "criteria": [
+    "low",
+    "medium",
+    "high"
+   ]
+  },
+  "answer": {
+   "type": "score",
+   "score": 1.7964,
+   "level": "high",
+   "probabilities": [
+    0.0337,
+    0.1362,
+    0.8301
+   ],
+   "confidence": 0.5082
+  }
+ },
+ {
+  "name": "noul_ag_news_2",
+  "state": "Agassi Wins in Straight Sets in Madrid (AP) AP - Andre Agassi breezed past fellow American Vince Spadea 6-1, 6-3 Thursday night to reach the quarterfinals in the Madrid Masters.",
+  "question": {
+   "type": "noul",
+   "instructions": "Is this article about sports, athletes, games and competitions?"
+  },
+  "answer": {
+   "type": "noul",
+   "probability": 0.9646,
+   "confidence": 0.7793
+  }
+ },
+ {
+  "name": "noul_emotion_8",
+  "state": "i feel sorry seeing my parents",
+  "question": {
+   "type": "noul",
+   "instructions": "Does the writer express this: the writer feels happy, content or pleased?"
+  },
+  "answer": {
+   "type": "noul",
+   "probability": 0.1292,
+   "confidence": 0.4449
+  }
+ }
+]

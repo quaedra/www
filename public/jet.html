@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jet · Quaedra Research</title>
+  <meta name="description" content="Jet is a typed decision model: give it a state and named questions, get back choices, scores and calibrated probabilities.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap page">
+    <header>
+      <a class="crumb mono" href="/">← Quaedra Research</a>
+      <h1>Jet</h1>
+      <p class="lede">A typed decision model. Give it a state and named questions; it returns choices, scores and probabilities, never free-form text.</p>
+      <p class="links mono">
+        <a href="https://github.com/quaedra/jet">GitHub</a>
+        <a href="https://huggingface.co/michaljach/jet">Weights</a>
+        <a href="https://huggingface.co/spaces/michaljach/jet">HF Space</a>
+        <a href="https://github.com/quaedra/jet/blob/main/TRAINING_HISTORY.md">Training history</a>
+      </p>
+      <div class="kv">
+        <div><b>v6.2</b><span>Latest release</span></div>
+        <div><b>Qwen3.5-4B</b><span>Base model, rank-16 LoRA</span></div>
+        <div><b>16,384</b><span>Max prompt tokens</span></div>
+      </div>
+    </header>
+
+    <section>
+      <h2 class="mono">How it works</h2>
+      <p>Each answer option maps to a single label token. Jet reads the next-token logits for those labels only, divides by a temperature fitted on held-out data, and applies softmax. One forward pass per question, no sampling. Answers always follow the requested type, but decisions can still be wrong.</p>
+      <table class="data">
+        <thead><tr><th>Type</th><th>Criteria</th><th>Answer</th></tr></thead>
+        <tbody>
+          <tr><td><code>choice</code></td><td>2–255 named options</td><td>Selected key, probability per key</td></tr>
+          <tr><td><code>score</code></td><td>2–10 ordered levels</td><td>Fractional score, level, probabilities</td></tr>
+          <tr><td><code>noul</code></td><td>None</td><td>Probability that the answer is yes</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 class="mono">Benchmarks</h2>
+      <h3>Jet v6.1 vs. Kev 8B, percentage points</h3>
+      <p class="note" style="margin-top:0">Difference from the archived Decision Index 0.1 reference score on 21 benchmarks where the metric and case count match.</p>
+      <div class="chart" id="vs-kev"></div>
+      <p class="note">Development evaluation of the v6.1 step-2,000 adapter before its BF16 merge, not v6.2. Kev figures are archived published scores, not a new local run. Matching counts do not prove identical cases. No official overall Decision Index has been measured for Jet. <a href="https://github.com/quaedra/jet/blob/main/experiments/jet-kev-comparison-20260925/results.md">Full report</a></p>
+      <details class="table"><summary>Show as table</summary><table class="data" id="vs-kev-table"></table></details>
+
+      <h3>v6.1 → v6.2 on the local holdout</h3>
+      <p class="note" style="margin-top:0">914 fixed cases, full merged BF16 weights.</p>
+      <div class="chart" id="v62"></div>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Jet v6.1</span><span><i style="background:var(--s2)"></i>Jet v6.2</span></div>
+      <p class="note">Small changes; not statistically significant. Financial sentiment measures SEntFiN transfer, not FinEntity.</p>
+    </section>
+
+    <section>
+      <h2 class="mono">Examples</h2>
+      <p>Real outputs recorded in the model's reference file (Jet V5, Qwen3-0.6B, calibrated). Pick a case to see the request and the typed answer.</p>
+      <div class="demo" id="jet-demo">
+        <div class="chips" id="jet-cases" style="margin-top:0"></div>
+        <div class="state" id="jet-state"></div>
+        <div class="q" id="jet-q"></div>
+        <div class="out">
+          <div class="verdict" id="jet-verdict"></div>
+          <div class="bars" id="jet-bars"></div>
+        </div>
+        <details class="table" style="margin-top:12px"><summary>Response JSON</summary><pre id="jet-json"></pre></details>
+      </div>
+      <p class="note">For live inference, run the model locally or start the <a href="https://huggingface.co/spaces/michaljach/jet">Hugging Face Space</a>, which serves the earlier 0.6B release and may be paused on free hosting.</p>
+    </section>
+
+    <section>
+      <h2 class="mono">Run it</h2>
+      <p>The v6.2 release is self-contained: merged bf16 weights plus the CUDA runtime.</p>
+<pre>hf download michaljach/jet --revision v6.2.0 --local-dir jet
+cd jet &amp;&amp; python -m pip install -r requirements.txt
+echo '{"state":"I was charged twice this month.",
+  "questions":{"billing":{"type":"noul",
+  "instructions":"Is this a billing issue?"}}}' | python jet.py</pre>
+    </section>
+
+    <footer class="mono">
+      <span>© <span id="y">2026</span> Quaedra Research</span>
+      <nav>
+        <a href="contact.html">Contact</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/quaedra">GitHub</a>
+      </nav>
+    </footer>
+  </div>
+  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+  <script type="module">
+    import { barChart, probBars } from "./charts.js";
+
+    // experiments/jet-kev-comparison-20260925/results.md — complete rows with matching metric/count
+    const kev = [
+      ["VAST", 47.58, 47.04], ["CRUXEval", 44.04, 44.04], ["Habermas Machine", 44.51, 41.71],
+      ["Amazon ESCI", 52.86, 40.23], ["GPQA Diamond", 43.88, 33.16], ["MuSR", 56.91, 54.79],
+      ["GSM8K", 70.13, 41.17], ["CLadder", 65.70, 59.94], ["BFCL", 91.97, 88.55],
+      ["SGD/SGD-X", 64.03, 58.88], ["BANKING77", 75.14, 82.66], ["CLINC150+OOS", 91.08, 76.79],
+      ["ANLI", 62.18, 49.31], ["WinoGrande", 71.03, 68.51], ["HellaSwag", 92.82, 79.50],
+      ["NLI4CT", 77.17, 70.35], ["ContractNLI", 76.82, 48.52], ["BPoMP", 82.86, 74.00],
+      ["Humicroedit", 60.08, 55.90], ["cfcolor", 64.36, 57.62], ["FinEntity", 80.80, 86.75],
+    ];
+    const rows = kev.map(([n, j, k]) => ({ n, j, k, d: +(j - k).toFixed(2) })).sort((a, b) => b.d - a.d);
+    const signed = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
+    barChart(document.getElementById("vs-kev"), {
+      rows: rows.map((r) => ({
+        label: r.n, values: [r.d],
+        tip: `<b>${r.n}</b><br>Jet v6.1: ${r.j.toFixed(2)}<br>Kev 8B: ${r.k.toFixed(2)}<br>Difference: ${signed(r.d)} pp`,
+      })),
+      series: [{ name: "Difference", color: "var(--s1)" }],
+      min: -10, max: 30, ticks: [-10, 0, 10, 20, 30], diverging: true,
+      fmt: (v, val) => (val ? signed(v) : String(v)),
+    });
+    document.getElementById("vs-kev-table").innerHTML =
+      "<thead><tr><th>Benchmark</th><th class='n'>Jet v6.1</th><th class='n'>Kev 8B</th><th class='n'>Δ pp</th></tr></thead><tbody>" +
+      rows.map((r) => `<tr><td>${r.n}</td><td class="n">${r.j.toFixed(2)}</td><td class="n">${r.k.toFixed(2)}</td><td class="n">${signed(r.d)}</td></tr>`).join("") +
+      "</tbody>";
+
+    // releases/jet-v6.2/evaluation.json
+    barChart(document.getElementById("v62"), {
+      rows: [
+        { label: "Retention acc.", values: [93.40, 93.40] },
+        { label: "Banking acc.", values: [74.68, 74.68] },
+        { label: "Entity sent. F1", values: [71.16, 71.21] },
+        { label: "Sarcasm F1", values: [46.81, 50.00] },
+      ],
+      series: [{ name: "Jet v6.1", color: "var(--s1)" }, { name: "Jet v6.2", color: "var(--s2)" }],
+      min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
+      fmt: (v, val) => (val ? v.toFixed(1) : String(v)),
+    });
+
+    // Recorded golden cases (michaljach/jet @ 25ccbd9e, golden.json)
+    const cases = await (await fetch("data/jet-examples.json")).json();
+    const titles = {
+      choice_dbpedia_0: "Entity type", choice_ag_news_2: "News topic", list_state: "Agent next step",
+      choice_mnli_3: "Entailment", choice_massive_5: "User intent", score_yelp_3: "Review score",
+      score_stsb_6: "Similarity", non_ascii_state: "Urgency (multilingual)", noul_ag_news_2: "Yes / no: sports?",
+      noul_emotion_8: "Yes / no: happy?",
+    };
+    const chips = document.getElementById("jet-cases");
+    function show(c) {
+      for (const b of chips.children) b.setAttribute("aria-pressed", b.dataset.name === c.name);
+      const s = c.state;
+      document.getElementById("jet-state").textContent = typeof s === "string" ? s : JSON.stringify(s, null, 2);
+      const q = c.question, a = c.answer;
+      document.getElementById("jet-q").innerHTML = `<span class="type mono">${q.type}</span>&nbsp; `;
+      document.getElementById("jet-q").append(q.instructions);
+      const v = document.getElementById("jet-verdict");
+      let items;
+      if (a.type === "choice") {
+        v.textContent = a.choice;
+        items = (c.top ?? Object.entries(a.probabilities)).map(([label, p]) => ({ label, p }));
+        const rest = Object.keys(a.probabilities).length - items.length;
+        if (rest > 0) items.push({ label: `${rest} other options`, p: Math.max(0, 1 - items.reduce((t, i) => t + i.p, 0)) });
+      } else if (a.type === "score") {
+        v.textContent = a.level;
+        items = q.criteria.map((label, i) => ({ label, p: a.probabilities[i] }));
+      } else {
+        v.textContent = a.probability >= 0.5 ? "yes" : "no";
+        items = [{ label: "yes", p: a.probability }, { label: "no", p: 1 - a.probability }];
+      }
+      const small = document.createElement("small");
+      small.textContent = a.type === "score" ? `score ${a.score.toFixed(2)}` : a.type === "noul" ? `p(yes) ${(a.probability * 100).toFixed(1)}%` : "";
+      v.append(small);
+      probBars(document.getElementById("jet-bars"), items, { highlight: a.type === "noul" ? (a.probability >= 0.5 ? "yes" : "no") : a.choice ?? a.level });
+      document.getElementById("jet-json").textContent = JSON.stringify(a, null, 2);
+    }
+    for (const c of cases) {
+      const b = document.createElement("button");
+      b.textContent = titles[c.name] || c.name;
+      b.dataset.name = c.name;
+      b.onclick = () => show(c);
+      chips.appendChild(b);
+    }
+    show(cases[0]);
+  </script>
+</body>
+</html>
