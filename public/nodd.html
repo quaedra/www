@@ -19,8 +19,8 @@
       <p class="lede">Tiny, calibrated text classifiers that run in the browser. One decision, about 20 MB, offline, no per-call cost, and each model knows when it is unsure.</p>
       <p class="links mono">
         <a href="https://github.com/quaedra/nodd">GitHub</a>
-        <a href="https://quaedra.github.io/nodd/">Playground</a>
-        <a href="https://quaedra.github.io/nodd/docs.html">Docs</a>
+        <a href="/nodd/app/">Playground</a>
+        <a href="/nodd/app/docs">Docs</a>
         <a href="https://huggingface.co/nodd-repo">Models</a>
       </p>
       <div class="kv">
@@ -236,7 +236,7 @@ const d = await m.decide("Buy cheap followers at …");
         status.textContent = `${cfg.model} · ${ms.toFixed(0)} ms`;
       } catch (err) {
         console.error(err);
-        status.textContent = "Could not load the model. Try the playground instead.";
+        status.textContent = "Could not load the model. Try the full app instead.";
       } finally {
         run.disabled = false;
       }
