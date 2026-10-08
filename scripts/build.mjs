@@ -25,6 +25,7 @@ for (const file of walk(join(dist, "pages"))) {
   renameSync(file, target);
 }
 rmSync(join(dist, "pages"), { recursive: true });
+for (const file of walk(dist)) if (file.endsWith("/.DS_Store")) unlinkSync(file);
 
 // sitemap.xml lists every page that doesn't ask not to be indexed; robots.txt points to it.
 const urls = walk(dist)
