@@ -13,16 +13,23 @@ Worker (`quaedra-www`).
   and not committed
 - `worker/index.js`: redirects old Nodd URLs and reassembles files split for the 25 MiB asset limit
 
-Nodd's runtime (`@nodd/browser`, `@nodd/core`) builds from source in `../nodd`.
+Nodd's runtime (`@nodd/browser`, `@nodd/core`) builds from source in `../nodd`. Nodd's models,
+onnxruntime files and training base model aren't in git: their published copy is the Hugging Face
+dataset [quaedra/nodd-site](https://huggingface.co/datasets/quaedra/nodd-site).
+
+Every push to `main` deploys: `.github/workflows/deploy.yml` checks out quaedra/nodd beside the
+site, pulls Nodd's files from Hugging Face, type-checks, builds and runs `wrangler deploy`.
 
 ```bash
 npm install
-npm run sync-nodd   # copy Nodd's models from ../nodd (run npm run sync-model there first)
+npm run nodd:pull   # download Nodd's files from quaedra/nodd-site into public/nodd/
+npm run sync-nodd   # or copy them from ../nodd (run npm run sync-model there first)…
+npm run nodd:push   # …then publish them to quaedra/nodd-site for the GitHub deploy
 npm run dev         # http://localhost:5173, clean URLs as in production
 npm run typecheck
 npm run build       # → dist/
 npm run preview     # build, then serve dist/ with the worker (wrangler dev)
-npm run deploy      # build and deploy to quaedra.com
+npm run deploy      # build and deploy from this machine (pushing to main does this too)
 npm run docs        # rebuild the Jet and megacode docs from ../jet and ../megacode
 npm run og          # re-render the Open Graph cards in public/og/
 ```
