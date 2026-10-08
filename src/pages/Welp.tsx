@@ -122,7 +122,7 @@ export default function Welp() {
 
       <section>
         <h2 className="mono" id="run-it">Run it</h2>
-        <p>Welp uses only standard llama.cpp formats, the same as UD-IQ3_XXS. The weights go up on Hugging Face as <span className="mono">quaedra/Welp-35B-A3B-GGUF</span>; the upload is still pending. Recipe, scripts and evals are on <a href="https://github.com/quaedra/welp">GitHub</a>.</p>
+        <p>Welp uses only standard llama.cpp formats, the same as UD-IQ3_XXS. Download it from Hugging Face: <a href="https://huggingface.co/quaedra/Welp-35B-A3B-GGUF">quaedra/Welp-35B-A3B-GGUF</a>. Recipe, scripts and evals are on <a href="https://github.com/quaedra/welp">GitHub</a>.</p>
         <pre>{`llama-server -m Welp-35B-A3B.gguf -ngl 99 -fa on -c 262144 \\
   -ctk q4_0 -ctv q4_0 -ub 256 --jinja`}</pre>
         <p className="note">For a more precise KV cache at half the context, use <span className="mono">-c 131072 -ctk q8_0 -ctv q8_0</span>.</p>
