@@ -30,7 +30,7 @@ const PROJECTS: { name: string; href?: string; status: [string, "live" | "traini
 
 export default function Home() {
   return (
-    <SiteLayout home title="Quaedra Research" lede={<p className="lede">We build compact, capable models for reasoning, decision-making and coding.</p>}>
+    <SiteLayout home title="Quaedra Research" lede={<p className="lede">We build compact models, AI tools and agent harnesses.</p>}>
       <section>
         <h2 className="mono">Projects</h2>
         <ul className="projects">
