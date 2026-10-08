@@ -2,6 +2,7 @@ import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import { type Plugin, defaultClientConditions, defineConfig, searchForWorkspaceRoot } from "vite";
+import { seo } from "./scripts/seo.ts";
 
 const root = import.meta.dirname;
 const pagesDir = join(root, "pages");
@@ -61,7 +62,7 @@ const devServer: Plugin = {
 };
 
 export default defineConfig({
-  plugins: [react(), devServer],
+  plugins: [react(), devServer, seo(pagesDir)],
   appType: "mpa",
   // @nodd/* resolve to their TypeScript sources in ../nodd (packages/*/src), not dist/
   resolve: { conditions: ["@nodd/source", ...defaultClientConditions] },

@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, s
 import { dirname, extname, join, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "vite";
+import { SITE, pathFor } from "./seo.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -24,6 +25,18 @@ for (const file of walk(join(dist, "pages"))) {
   renameSync(file, target);
 }
 rmSync(join(dist, "pages"), { recursive: true });
+
+// sitemap.xml lists every page that doesn't ask not to be indexed; robots.txt points to it.
+const urls = walk(dist)
+  .filter((f) => f.endsWith(".html") && !readFileSync(f, "utf8").includes('<meta name="robots" content="noindex">'))
+  .map((f) => SITE + pathFor(f, dist))
+  .sort();
+writeFileSync(join(dist, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
+</urlset>
+`);
+writeFileSync(join(dist, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
 // Prerender every page that names itself in <body data-page>.
 const ssrDir = join(root, ".ssr");
