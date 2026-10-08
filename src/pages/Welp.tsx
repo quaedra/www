@@ -1,4 +1,4 @@
-import { BarChart, type BarChartProps, Legend, ScatterChart, type ScatterPoint } from "../ui/charts";
+import { BarChart, type BarChartProps, Legend, LineChart, type LineSeries, ScatterChart, type ScatterPoint } from "../ui/charts";
 import { KeyFigures, ProjectLayout } from "../ui/Layout";
 
 /** Bars with Welp in the highlight color. */
@@ -19,6 +19,20 @@ const SIZE: { label: string; table: string; base: string; gb: number; passed: nu
   { label: "Bonsai 2 27B", table: "Bonsai 2 27B", base: "Qwen3.8-27B", gb: 5.95, passed: 150, group: "other", side: "t" },
   { label: "Qwen3.8-27B", table: "UD-Q3_K_XL", base: "Qwen3.8-27B", gb: 13.15, passed: 158, group: "other", side: "l" },
 ];
+
+// Speed against context depth: llama-bench -d, tg128 and pp2048, q4_0 KV, -ub 256, RTX 4080 Super; results/ctxspeed in quaedra/welp
+const DEPTHS = [0, 4096, 16384, 32768, 65536, 131072, 196608, 258048];
+const CTX: { name: string; color: string; focus?: boolean; tg: number[]; pp: number[] }[] = [
+  { name: "Welp-35B-A3B", color: "var(--s2)", focus: true,
+    tg: [161.5, 161.8, 155.1, 151.8, 141.1, 126.9, 115.2, 105.0], pp: [3826, 3667, 3301, 3063, 2637, 2029, 1647, 1396] },
+  { name: "Bonsai 2 27B", color: "var(--muted)",
+    tg: [83.9, 83.8, 80.4, 76.5, 69.4, 58.8, 50.9, 45.1], pp: [2335, 2247, 1952, 1660, 1285, 882, 672, 548] },
+  { name: "Qwen3.8-27B", color: "var(--s1)",
+    tg: [46.6, 46.4, 45.3, 44.1, 41.6, 37.5], pp: [2132, 2044, 1791, 1550, 1220, 851] },
+];
+const lines = (k: "tg" | "pp"): LineSeries[] =>
+  CTX.map((c) => ({ name: c.name, color: c.color, focus: c.focus, endCross: c[k].length < DEPTHS.length, points: c[k].map((y, i) => ({ x: DEPTHS[i], y })) }));
+const ctxAxis = { min: 0, max: 262144, ticks: [0, 32768, 65536, 131072, 196608, 262144], fmt: (v: number) => (v ? Math.round(v / 1024) + "k" : "0"), title: "Context already in the cache (tokens)" };
 
 /** pass@1 in percent */
 const he = (passed: number) => (passed / 164) * 100;
@@ -118,6 +132,29 @@ export default function Welp() {
         <p>Welp is one problem behind the dense Qwen3.8-27B on HumanEval (157 against 158 of 164) and three tasks behind on long-exact (23 against 26 of 37), at 3.5 times its decode speed and twice its context. It beats UD-IQ3_XXS of its own base model on every quality measure at the same size. The differences against UD-IQ3_XXS on HumanEval and long-exact are small enough to be run-to-run noise on their own; the perplexity gain is consistent.</p>
         <h3>Full context</h3>
         <p>With a q4_0 KV cache, Welp runs the full 262k context entirely on a 16 GB card (14.8 GB, including about 0.8 GB used by the desktop). After a 214k-token prompt it still decodes at 107 tok/s, and prefill runs at 2,043 tok/s. A passcode hidden at 10%, 50% and 90% of that prompt was retrieved every time.</p>
+        <h3>Fig V: Decode speed vs context</h3>
+        <p className="note" style={{ marginTop: 0 }}>Tokens per second generating 128 tokens after the given amount of context, llama-bench. Same KV cache (q4_0) for every model. Qwen3.8-27B does not fit 192k on the card (×).</p>
+        <LineChart series={lines("tg")} x={ctxAxis} y={{ min: 0, max: 175, ticks: [0, 50, 100, 150], fmt: (v) => String(Math.round(v)), title: "Decode tok/s" }} />
+        <h3>Fig VI: Prefill speed vs context</h3>
+        <p className="note" style={{ marginTop: 0 }}>Tokens per second reading the next 2,048 prompt tokens after the given amount of context.</p>
+        <LineChart series={lines("pp")} x={ctxAxis} y={{ min: 0, max: 4000, ticks: [0, 1000, 2000, 3000, 4000], fmt: (v) => v.toLocaleString("en-US"), title: "Prefill tok/s" }} />
+        <details className="table">
+          <summary>Show as table</summary>
+          <div className="scroll-x">
+            <table className="data">
+              <thead><tr><th>Model</th>{DEPTHS.map((d) => <th key={d} className="n">{ctxAxis.fmt(d)}</th>)}</tr></thead>
+              <tbody>
+                {CTX.flatMap((c) => (["tg", "pp"] as const).map((k) => (
+                  <tr key={c.name + k}>
+                    <td>{c.focus ? <b>{c.name}</b> : c.name} {k === "tg" ? "decode" : "prefill"}</td>
+                    {DEPTHS.map((d, i) => <td key={d} className="n">{c[k][i] != null ? c[k][i].toLocaleString("en-US") : "–"}</td>)}
+                  </tr>
+                )))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <p className="note">Welp keeps 65% of its decode speed at 252k (161 to 105 tok/s); Bonsai 2 keeps 54%. At 252k Welp still decodes faster than either 27B model with an empty cache: only 10 of its 40 layers use full attention, the rest are linear-attention (Gated DeltaNet) layers whose cost does not grow with context, and only 3B of its parameters are active per token. Run with <span className="mono">-ub 256</span> for every model, the batch size Welp needs for 262k on 16 GB, so prefill is lower than in Fig III (default batch). UD-IQ3_XXS is left out: same architecture and formats as Welp, same speed (Fig II, III).</p>
       </section>
 
       <section>

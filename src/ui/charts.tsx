@@ -1,4 +1,4 @@
-// Horizontal bar charts, a log-x scatter plot and probability bars, drawn as inline SVG.
+// Horizontal bar charts, a log-x scatter plot, line charts and probability bars, drawn as inline SVG.
 // Charts render empty on the server and draw once they know their width.
 import { type PointerEvent, type ReactNode, useLayoutEffect, useRef, useState } from "react";
 
@@ -208,6 +208,107 @@ export function ScatterChart({ points, groups, x, y, line = [], vline }: Scatter
           return g.shape === "diamond"
             ? <rect key={p.label} className={cls} x={cx - r * 0.8} y={cy - r * 0.8} width={r * 1.6} height={r * 1.6} rx={1.5} transform={`rotate(45 ${cx} ${cy})`} fill={g.color} />
             : <circle key={p.label} className={cls} cx={cx} cy={cy} r={r} fill={g.color} />;
+        })}
+      </svg>
+    );
+  }
+  return <div className="chart" ref={ref}>{svg}{tip.node}</div>;
+}
+
+export interface LineSeries {
+  name: string;
+  color: string;
+  points: { x: number; y: number }[];
+  /** Drawn thicker and on top. */
+  focus?: boolean;
+  /** Marks the last point with a cross: the series cannot go further (e.g. out of memory). */
+  endCross?: boolean;
+}
+
+export interface LineChartProps {
+  series: LineSeries[];
+  /** Linear. */
+  x: Axis;
+  y: Axis;
+  vline?: { x: number; label: string };
+}
+
+/** Lines over a linear x axis with a direct label at each line's end and a tooltip for the nearest point. */
+export function LineChart({ series, x, y, vline }: LineChartProps) {
+  const [ref, W] = useWidth();
+  const tip = useTip();
+  const [hover, setHover] = useState<string | null>(null);
+
+  let svg = null;
+  if (W > 0) {
+    const H = W < 480 ? 280 : 320;
+    // Right margin fits the longest end label (about 7 px per character at 12 px).
+    const m = { l: 58, r: 14 + 7 * Math.max(...series.filter((s) => !s.endCross).map((s) => s.name.length)), t: 12, b: 40 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const sx = (v: number) => m.l + ((v - x.min) / (x.max - x.min)) * pw;
+    const sy = (v: number) => m.t + (1 - (v - y.min) / (y.max - y.min)) * ph;
+    const ordered = [...series].sort((a, b) => Number(!!a.focus) - Number(!!b.focus));
+    // End labels at the right, nudged apart vertically so they never overlap; a line that stops early
+    // (endCross) is labeled below its last point instead, where other lines are unlikely to run.
+    const ends = series.filter((s) => !s.endCross).map((s) => ({ s, y: sy(s.points[s.points.length - 1].y) })).sort((a, b) => a.y - b.y);
+    for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 14);
+
+    const onMove = (e: PointerEvent<SVGSVGElement>) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      const px = ((e.clientX - r.left) / r.width) * W, py = ((e.clientY - r.top) / r.height) * H;
+      let best: { s: LineSeries; p: { x: number; y: number } } | null = null, bd = 24 * 24;
+      for (const s of series) for (const p of s.points) {
+        const d = (sx(p.x) - px) ** 2 + (sy(p.y) - py) ** 2;
+        if (d < bd) { bd = d; best = { s, p }; }
+      }
+      setHover(best ? best.s.name + best.p.x : null);
+      if (best) tip.show(e, <><b>{best.s.name}</b><br />{x.fmt(best.p.x)} context: {y.fmt(best.p.y)}</>);
+      else tip.hide();
+    };
+
+    svg = (
+      <svg viewBox={`0 0 ${W} ${H}`} height={H} role="img" onPointerMove={onMove} onPointerLeave={() => { tip.hide(); setHover(null); }}>
+        {y.ticks.map((t) => (
+          <g key={t}>
+            <line className="grid" x1={m.l} x2={W - m.r} y1={sy(t)} y2={sy(t)} />
+            <text x={m.l - 8} y={sy(t) + 4} textAnchor="end">{y.fmt(t)}</text>
+          </g>
+        ))}
+        {x.ticks.map((t) => (
+          <g key={t}>
+            <line className="grid" x1={sx(t)} x2={sx(t)} y1={m.t} y2={H - m.b} />
+            <text x={sx(t)} y={H - m.b + 16} textAnchor="middle">{x.fmt(t)}</text>
+          </g>
+        ))}
+        <text x={m.l + pw / 2} y={H - 4} textAnchor="middle">{x.title}</text>
+        <text x={0} y={0} textAnchor="middle" transform={`translate(11 ${m.t + ph / 2}) rotate(-90)`}>{y.title}</text>
+        {vline && (
+          <>
+            <line className="vline" x1={sx(vline.x)} x2={sx(vline.x)} y1={m.t} y2={H - m.b} />
+            <text x={sx(vline.x) - 6} y={m.t + 12} textAnchor="end">{vline.label}</text>
+          </>
+        )}
+        {ordered.map((s) => {
+          const last = s.points[s.points.length - 1];
+          const r = s.focus ? 4.5 : 3.5;
+          return (
+            <g key={s.name}>
+              <polyline className="line" points={s.points.map((p) => `${sx(p.x)},${sy(p.y)}`).join(" ")} stroke={s.color} strokeWidth={s.focus ? 2.5 : 1.75} />
+              {s.points.map((p) => (
+                <circle key={p.x} className={hover === s.name + p.x ? "dot on" : "dot"} cx={sx(p.x)} cy={sy(p.y)} r={r} fill={s.color} />
+              ))}
+              {s.endCross && (
+                <path className="cross" d={`M${sx(last.x) + 7},${sy(last.y) - 5}l10,10m0,-10l-10,10`} stroke={s.color} />
+              )}
+            </g>
+          );
+        })}
+        {ends.map(({ s, y: ly }) => (
+          <text key={s.name} className={s.focus ? "v" : undefined} x={sx(s.points[s.points.length - 1].x) + 8} y={ly + 4}>{s.name}</text>
+        ))}
+        {series.filter((s) => s.endCross).map((s) => {
+          const last = s.points[s.points.length - 1];
+          return <text key={s.name} x={sx(last.x)} y={sy(last.y) + 20} textAnchor="end">{s.name}</text>;
         })}
       </svg>
     );
