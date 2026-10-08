@@ -26,8 +26,8 @@ const he = (passed: number) => (passed / 164) * 100;
 const COMPARISON: [string, string, string, string, string, string, string][] = [
   ["Welp-35B-A3B", "13.21", "95.7%", "23/37", "262k", "164", "5,111"],
   ["UD-IQ3_XXS (Unsloth)", "13.21", "93.9%", "21/37", "262k", "165", "5,165"],
-  ["Qwen3.8-27B (UD-Q3_K_XL)", "13.15", "96.3%", "–", "131k", "47", "2,155"],
-  ["Bonsai 2 27B", "5.95", "91.5%", "17/37*", "262k", "85", "2,278"],
+  ["Qwen3.8-27B (UD-Q3_K_XL)", "13.15", "96.3%", "26/37", "131k", "47", "2,155"],
+  ["Bonsai 2 27B", "5.95", "91.5%", "15/37", "262k", "85", "2,278"],
 ];
 
 export default function Welp() {
@@ -114,8 +114,8 @@ export default function Welp() {
             </tbody>
           </table>
         </div>
-        <p className="note">Single runs on an RTX 4080 Super (16 GB). Context is the largest that fits entirely on the card with a q4_0 KV cache. Long-exact is the bonsai-ada-surgery suite (37 long tool-using tasks, thinking on); the Qwen3.8-27B run is in progress, and *Bonsai's score is from the bonsai-ada-surgery report (RTX 4070). Qwen3.8-27B is the dense model Bonsai 2 is built from; Welp and UD-IQ3_XXS are Qwen3.6-35B-A3B, so perplexity is only comparable between those two: 5.762 for Welp against 5.873 for UD-IQ3_XXS on wikitext-2 (1.880 against 1.900 on code).</p>
-        <p>Welp matches the dense Qwen3.8-27B on HumanEval (157 against 158 of 164) at 3.5 times its decode speed and twice its context, and beats UD-IQ3_XXS of its own base model on every quality measure at the same size. The differences against UD-IQ3_XXS on HumanEval and long-exact are small enough to be run-to-run noise on their own; the perplexity gain is consistent.</p>
+        <p className="note">Single runs on an RTX 4080 Super (16 GB). Context is the largest that fits entirely on the card with a q4_0 KV cache. Long-exact is the bonsai-ada-surgery suite (37 long tool-using tasks, thinking on). Bonsai 2 scores 15/37 here against 17/37 in the bonsai-ada-surgery report (RTX 4070). Qwen3.8-27B is the dense model Bonsai 2 is built from; Welp and UD-IQ3_XXS are Qwen3.6-35B-A3B, so perplexity is only comparable between those two: 5.762 for Welp against 5.873 for UD-IQ3_XXS on wikitext-2 (1.880 against 1.900 on code).</p>
+        <p>Welp is one problem behind the dense Qwen3.8-27B on HumanEval (157 against 158 of 164) and three tasks behind on long-exact (23 against 26 of 37), at 3.5 times its decode speed and twice its context. It beats UD-IQ3_XXS of its own base model on every quality measure at the same size. The differences against UD-IQ3_XXS on HumanEval and long-exact are small enough to be run-to-run noise on their own; the perplexity gain is consistent.</p>
         <h3>Full context</h3>
         <p>With a q4_0 KV cache, Welp runs the full 262k context entirely on a 16 GB card (14.8 GB, including about 0.8 GB used by the desktop). After a 214k-token prompt it still decodes at 107 tok/s, and prefill runs at 2,043 tok/s. A passcode hidden at 10%, 50% and 90% of that prompt was retrieved every time.</p>
       </section>
