@@ -188,6 +188,7 @@ ${body}
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
         <a href="https://github.com/quaedra">GitHub</a>
+        <a href="https://huggingface.co/quaedra">Hugging Face</a>
       </nav>
     </footer>
   </div>
