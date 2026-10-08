@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Welp · Quaedra Research</title>
-  <meta name="description" content="Welp-35B-A3B is a ternary build of a 35B mixture-of-experts model that runs on a 16 GB GPU with 262k context.">
+  <meta name="description" content="Welp-35B-A3B is Qwen3.6-35B-A3B in 13.21 GB: the full 262k context on a 16 GB GPU, and higher scores than UD-IQ3_XXS at the same size.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,55 +16,58 @@
     <header>
       <a class="crumb mono" href="/"><svg class="glyph" viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</a>
       <h1>Welp</h1>
-      <p class="lede">Welp-35B-A3B is a mixture-of-experts model with its experts quantized to ternary weights, so it runs entirely on a 16 GB GPU with a 262k context.</p>
+      <p class="lede">Welp-35B-A3B is Qwen3.6-35B-A3B in 13.21 GB. It runs on a 16 GB GPU with the full 262k context, and scores higher than Unsloth's UD-IQ3_XXS at exactly the same size.</p>
       <nav class="links mono" aria-label="Welp">
         <a href="/welp" aria-current="page">Overview</a>
         <a href="#benchmarks">Benchmarks</a>
         <a href="#run-it">Run it</a>
       </nav>
       <div class="kv">
-        <div><b>9.82 GB</b><span>GGUF file</span></div>
-        <div><b>13.3 GB</b><span>VRAM at 262k context</span></div>
-        <div><b>90.9%</b><span>HumanEval pass@1</span></div>
+        <div><b>13.21 GB</b><span>GGUF file</span></div>
+        <div><b>262k</b><span>context on 16 GB</span></div>
+        <div><b>95.7%</b><span>HumanEval pass@1</span></div>
       </div>
     </header>
 
     <section>
       <h2 class="mono">How it works</h2>
-      <p>Welp is post-training quantization only: no fine-tuning and no new capabilities. The routed experts, most of the model's weights, are stored as ternary weights (PTQ1_0, 1.75 bits per weight). Each expert is fitted to minimize its output error, then refined layer by layer with GPTQ and block-wise scale tuning. The expert down-projections are kept at Q2_K and everything outside the experts at Q4_K.</p>
-      <p class="note aside">Quantized from Qwen3.6-35B-A3B (35B total, 3B active, 256 experts, top-8). One file, <span class="mono">Welp-35B-A3B.gguf</span>, 9.82 GB. VRAM at 262k measured with a q8_0 KV cache, including about 0.8 GB used by the desktop. 12 GB cards were not tested.</p>
+      <p>Welp is the same model, quantized more carefully: no fine-tuning and no new training data. It keeps the per-tensor format mix of Unsloth's UD-IQ3_XXS and re-quantizes only the expert weights. Each expert matrix is quantized one 256-weight block at a time with llama.cpp's own quantizer, and each block's rounding error is pushed into the weights not yet quantized (GPTQ, applied block-wise so standard formats can be used). Layers go in order, each fed the output of the already quantized layers.</p>
+      <p>A control with the same calibration data but without the error feedback scores the same as UD-IQ3_XXS, so the gain comes from the error feedback.</p>
+      <p class="note aside">Quantized from Qwen3.6-35B-A3B (35B total, 3B active, 256 experts, top-8). Experts gate/up IQ2_S, down IQ3_XXS (IQ4_XS in 3 layers), everything else Q6_K, as in UD-IQ3_XXS. Standard llama.cpp formats.</p>
     </section>
 
     <section>
       <h2 class="mono" id="benchmarks">Benchmarks</h2>
+      <h3>HumanEval pass@1</h3>
+      <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model, RTX 4080 Super.</p>
+      <div class="chart" id="he"></div>
       <h3>Decode speed</h3>
-      <p class="note" style="margin-top:0">Tokens per second, llama-bench tg128 on the same RTX 4080 Super. Q4_K_M doesn't fit in 16 GB, so it isn't measured; Bonsai 2 runs without multi-token prediction.</p>
+      <p class="note" style="margin-top:0">Tokens per second, llama-bench tg128. Q4_K_M doesn't fit in 16 GB, so it isn't measured.</p>
       <div class="chart" id="speed"></div>
       <h3>Prefill speed</h3>
-      <p class="note" style="margin-top:0">Tokens per second, llama-bench pp4096 on the same RTX 4080 Super. Q4_K_M doesn't fit in 16 GB, so it isn't measured.</p>
+      <p class="note" style="margin-top:0">Tokens per second, llama-bench pp4096.</p>
       <div class="chart" id="prefill"></div>
-      <h3>HumanEval pass@1</h3>
-      <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model.</p>
-      <div class="chart" id="he"></div>
       <table class="data">
-        <thead><tr><th>Model</th><th class="n">File</th><th class="n">Wikitext PPL</th><th class="n">Long-exact</th><th class="n">Decode</th><th class="n">Prefill</th></tr></thead>
+        <thead><tr><th>Model</th><th class="n">GB</th><th class="n">Wiki PPL</th><th class="n">Code PPL</th><th class="n">Long-exact</th><th class="n">Decode tok/s</th><th class="n">Prefill tok/s</th></tr></thead>
         <tbody>
-          <tr><td><b>Welp-35B-A3B</b></td><td class="n">9.82 GB</td><td class="n">6.39</td><td class="n">14/37</td><td class="n">197 tok/s</td><td class="n">5,442 tok/s</td></tr>
-          <tr><td>IQ2_XXS</td><td class="n">9.50 GB</td><td class="n">7.83</td><td class="n">5/37</td><td class="n">212 tok/s</td><td class="n">5,706 tok/s</td></tr>
-          <tr><td>UD-IQ3_XXS (Unsloth)</td><td class="n">13.21 GB</td><td class="n">5.87</td><td class="n">21/37</td><td class="n">169 tok/s</td><td class="n">4,923 tok/s</td></tr>
-          <tr><td>Q4_K_M</td><td class="n">21.17 GB</td><td class="n">5.62</td><td class="n">–</td><td class="n">–</td><td class="n">–</td></tr>
-          <tr><td>Bonsai 2 27B</td><td class="n">5.95 GB</td><td class="n">–</td><td class="n">17/37*</td><td class="n">83 tok/s</td><td class="n">2,271 tok/s</td></tr>
+          <tr><td><b>Welp-35B-A3B</b></td><td class="n">13.21</td><td class="n">5.762</td><td class="n">1.880</td><td class="n">23/37</td><td class="n">164</td><td class="n">5,111</td></tr>
+          <tr><td>UD-IQ3_XXS (Unsloth)</td><td class="n">13.21</td><td class="n">5.873</td><td class="n">1.900</td><td class="n">21/37</td><td class="n">165</td><td class="n">5,165</td></tr>
+          <tr><td>Q4_K_M</td><td class="n">21.17</td><td class="n">5.62</td><td class="n">1.67</td><td class="n">–</td><td class="n">–</td><td class="n">–</td></tr>
+          <tr><td>IQ2_XXS</td><td class="n">9.50</td><td class="n">7.83</td><td class="n">2.65</td><td class="n">5/37</td><td class="n">212</td><td class="n">5,706</td></tr>
         </tbody>
       </table>
-      <p class="note">Single runs on an RTX 4080 Super (16 GB). Perplexity on wikitext-2 at 2,048-token context (lower is better); decode is llama-bench tg128, prefill pp4096. IQ2_XXS was quantized locally with the same imatrix. Q4_K_M doesn't fit in 16 GB. UD-IQ3_XXS fits a 131k context with a q8_0 KV cache, or the full 262k with a q4_0 KV cache. Bonsai 2 runs without multi-token prediction. *Bonsai's long-exact score is from the bonsai-ada-surgery report, measured on an RTX 4070, not re-run here.</p>
-      <p>At the same size, Welp beats 2-bit quantization on every quality measure here, at slightly lower speed. It is about level with Bonsai 2 27B on quality at more than twice the speed, and the larger UD-IQ3_XXS still scores higher on a 16 GB card.</p>
+      <p class="note">Single runs on an RTX 4080 Super (16 GB). Perplexity at 2,048-token context on wikitext-2 and on ten CPython standard-library files (lower is better). Long-exact is the bonsai-ada-surgery suite (37 long tool-using tasks, thinking on). Q4_K_M doesn't fit in 16 GB. The HumanEval and long-exact differences between Welp and UD-IQ3_XXS are small enough to be run-to-run noise on their own; the perplexity gain is consistent, and every measure points the same way.</p>
+      <h3>Full context</h3>
+      <p>With a q4_0 KV cache, Welp runs the full 262k context entirely on a 16 GB card (14.8 GB, including about 0.8 GB used by the desktop). After a 214k-token prompt it still decodes at 107 tok/s, and prefill runs at 2,043 tok/s. A passcode hidden at 10%, 50% and 90% of that prompt was retrieved every time.</p>
     </section>
 
     <section>
       <h2 class="mono" id="run-it">Run it</h2>
-      <p>Welp runs on <a href="https://github.com/PrismML-Eng/llama.cpp">PrismML's llama.cpp fork</a>, which adds the ternary format; upstream llama.cpp can't load it. The recipe, scripts and evals are on <a href="https://github.com/quaedra/welp">GitHub</a>. The weights go up on Hugging Face as <span class="mono">quaedra/Welp-35B-A3B-GGUF</span>; the upload is still pending.</p>
+      <p>Welp uses only standard llama.cpp formats, the same as UD-IQ3_XXS. The weights go up on Hugging Face as <span class="mono">quaedra/Welp-35B-A3B-GGUF</span>; the upload is still pending. Recipe, scripts and evals are on <a href="https://github.com/quaedra/welp">GitHub</a>.</p>
 <pre>llama-server -m Welp-35B-A3B.gguf -ngl 99 -fa on -c 262144 \
-  -ctk q8_0 -ctv q8_0 --jinja</pre>
+  -ctk q4_0 -ctv q4_0 -ub 256 --jinja</pre>
+      <p class="note">For a more precise KV cache at half the context, use <span class="mono">-c 131072 -ctk q8_0 -ctv q8_0</span>.</p>
+      <p class="note aside">Welp started as a ternary build (PTQ1_0 experts, 9.82 GB). It beat 2-bit quantization clearly but not UD-IQ3_XXS on a 16 GB card, which led to this version. That build isn't released; its research log is on GitHub. Thanks to the Qwen team for the base model, Unsloth for the UD-IQ3_XXS format mix, and llama.cpp for the formats.</p>
     </section>
 
     <footer class="mono">
@@ -82,39 +85,25 @@
   <script type="module">
     import { barChart } from "/charts.js";
 
-    // RTX 4080 Super, same HumanEval harness (164 problems, thinking off, temperature 0)
-    const he = [
-      ["Q4_K_M (21.17 GB)", 95.7], ["UD-IQ3_XXS (13.21 GB)", 93.9], ["Bonsai 2 27B", 91.5],
-      ["Welp-35B-A3B (9.82 GB)", 90.9], ["IQ2_XXS (9.50 GB)", 84.8],
-    ];
-    barChart(document.getElementById("he"), {
-      rows: he.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
-      series: [{ name: "pass@1", color: "var(--s1)" }],
-      min: 0, max: 100, ticks: [0, 25, 50, 75, 100],
-      fmt: (v, val) => (val ? v.toFixed(1) + (val ? "%" : "") : String(v)),
+    const mark = (rows, opts) => ({
+      rows: rows.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
+      series: [{ name: opts.name, color: "var(--s1)" }], ...opts,
     });
+
+    // RTX 4080 Super, same HumanEval harness (164 problems, thinking off, temperature 0)
+    barChart(document.getElementById("he"), mark([
+      ["Q4_K_M (21.17 GB)", 95.7], ["Welp-35B-A3B (13.21 GB)", 95.7], ["UD-IQ3_XXS (13.21 GB)", 93.9], ["IQ2_XXS (9.50 GB)", 84.8],
+    ], { name: "pass@1", min: 0, max: 100, ticks: [0, 25, 50, 75, 100], fmt: (v, val) => (val ? v.toFixed(1) + "%" : String(v)) }));
 
     // llama-bench tg128, RTX 4080 Super (16 GB)
-    const speed = [
-      ["IQ2_XXS (9.50 GB)", 212], ["Welp-35B-A3B (9.82 GB)", 197], ["UD-IQ3_XXS (13.21 GB)", 169], ["Bonsai 2 27B", 83],
-    ];
-    barChart(document.getElementById("speed"), {
-      rows: speed.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
-      series: [{ name: "tok/s", color: "var(--s1)" }],
-      min: 0, max: 250, ticks: [0, 50, 100, 150, 200, 250],
-      fmt: (v) => String(v),
-    });
+    barChart(document.getElementById("speed"), mark([
+      ["IQ2_XXS (9.50 GB)", 212], ["UD-IQ3_XXS (13.21 GB)", 165], ["Welp-35B-A3B (13.21 GB)", 164],
+    ], { name: "tok/s", min: 0, max: 250, ticks: [0, 50, 100, 150, 200, 250], fmt: (v) => String(v) }));
 
     // llama-bench pp4096, RTX 4080 Super (16 GB)
-    const prefill = [
-      ["IQ2_XXS (9.50 GB)", 5706], ["Welp-35B-A3B (9.82 GB)", 5442], ["UD-IQ3_XXS (13.21 GB)", 4923], ["Bonsai 2 27B", 2271],
-    ];
-    barChart(document.getElementById("prefill"), {
-      rows: prefill.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
-      series: [{ name: "tok/s", color: "var(--s1)" }],
-      min: 0, max: 6000, ticks: [0, 2000, 4000, 6000],
-      fmt: (v) => v.toLocaleString("en-US"),
-    });
+    barChart(document.getElementById("prefill"), mark([
+      ["IQ2_XXS (9.50 GB)", 5706], ["UD-IQ3_XXS (13.21 GB)", 5165], ["Welp-35B-A3B (13.21 GB)", 5111],
+    ], { name: "tok/s", min: 0, max: 6000, ticks: [0, 2000, 4000, 6000], fmt: (v) => v.toLocaleString("en-US") }));
   </script>
 </body>
 </html>
