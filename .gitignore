@@ -1,3 +1,9 @@
 .wrangler/
 node_modules/
 .DS_Store
+dist/
+.ssr/
+# Nodd's models, onnxruntime files and training base model, copied from ../nodd by npm run sync-nodd
+public/nodd/models/
+public/nodd/ort/
+public/nodd/training/

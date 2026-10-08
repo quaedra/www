@@ -1,5 +1,6 @@
-// Builds each project's documentation pages (public/<project>/docs/) from the Markdown in its
-// repository, in the site's own style.
+// Builds each project's documentation pages from the Markdown in its repository: the rendered
+// body and menu as src/docs/<project>/<page>.json (drawn by src/pages/Doc.tsx) and the page's
+// HTML entry with its meta tags as pages/<project>/docs/<page>.html. Images go to public/.
 //
 //   npm run docs                      # reads ../jet and ../megacode
 //   npm run docs -- megacode          # one project
@@ -57,7 +58,9 @@ for (const project of projects) {
 
 function build(project) {
   const repo = process.env[`${project.id.toUpperCase()}_REPO`] ?? join(root, "..", project.id);
-  const out = join(root, "public", project.id, "docs");
+  const dataDir = join(root, "src", "docs", project.id);
+  const htmlDir = join(root, "pages", project.id, "docs");
+  const assetDir = join(root, "public", project.id, "docs", "assets");
   const pageBySource = new Map(project.pages.map((page) => [page.source, page]));
   const url = (page) => `/${project.id}/docs/${page.slug}`;
 
@@ -65,8 +68,9 @@ function build(project) {
     console.error(`No ${project.name} repository at ${repo}. Set ${project.id.toUpperCase()}_REPO.`);
     process.exit(1);
   }
-  rmSync(out, { recursive: true, force: true });
-  mkdirSync(join(out, "assets"), { recursive: true });
+  for (const dir of [dataDir, htmlDir, assetDir]) rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dataDir, { recursive: true });
+  mkdirSync(htmlDir, { recursive: true });
 
   for (const page of project.pages) {
     const markdown = readFileSync(join(repo, page.source), "utf8");
@@ -103,7 +107,9 @@ function build(project) {
     // The page title comes from the template, not the document's own H1, and the site menu replaces
     // the README's row of links (Website · Docs · …).
     const body = marked.parse(markdown.replace(/^# .*\n+/, "").replace(/^\[Website\]\([^\n]*(?:\n\[[^\n]*)*\n+/m, ""));
-    writeFileSync(join(out, page.slug ? `${page.slug}.html` : "index.html"), render(project, page, body, usesMermaid, url));
+    const name = page.slug || "index";
+    writeFileSync(join(dataDir, `${name}.json`), JSON.stringify(data(project, page, body, usesMermaid, url), null, 2) + "\n");
+    writeFileSync(join(htmlDir, `${name}.html`), entry(project, page, url));
     console.log(`${project.id}/${page.source} → ${url(page)}`);
   }
 
@@ -122,7 +128,8 @@ function build(project) {
     if (/^[a-z]+:/i.test(href)) return href;
     const resolved = normalize(posix.join(sourceDir, href));
     const name = resolved.replace(/[\\/]/g, "-");
-    copyFileSync(join(repo, resolved), join(out, "assets", name));
+    mkdirSync(assetDir, { recursive: true });
+    copyFileSync(join(repo, resolved), join(assetDir, name));
     return `/${project.id}/docs/assets/${name}`;
   }
 }
@@ -131,17 +138,29 @@ function escape(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function render(project, page, body, usesMermaid, url) {
-  // The project's submenu, the same as on its overview page.
-  const nav = [
-    `<a href="/${project.id}">Overview</a>`,
-    ...project.pages.filter((other) => other.nav !== false || other === page).map((other) => other === page
-      ? `<a href="${url(other)}" aria-current="page">${other.title}</a>`
-      : `<a href="${url(other)}">${other.title}</a>`),
-    `<a href="${project.github}">GitHub</a>`,
-    ...project.links.map(([label, href]) => `<a href="${href}">${label}</a>`),
-  ].join("\n        ");
+/** What src/pages/Doc.tsx draws: the project menu, the page title and the rendered body. */
+function data(project, page, body, usesMermaid, url) {
+  return {
+    project: project.name,
+    title: page.title,
+    // The project's submenu, the same as on its overview page.
+    menu: [
+      ["Overview", `/${project.id}`],
+      ...project.pages.filter((other) => other.nav !== false || other === page)
+        .map((other) => (other === page ? [other.title, url(other), true] : [other.title, url(other)])),
+      ["GitHub", project.github],
+      ...project.links,
+    ],
+    source: `${project.github}/blob/main/${page.source}`,
+    mermaid: usesMermaid,
+    html: body,
+  };
+}
+
+/** The page's HTML entry: meta tags for search and link previews, then the app. */
+function entry(project, page, url) {
   const title = `${page.title} · ${project.name}`;
+  const name = page.slug || "index";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -163,52 +182,12 @@ function render(project, page, body, usesMermaid, url) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/src/styles/site.css">
 </head>
-<body>
-  <!-- Generated by scripts/build-docs.mjs from ${project.github}/blob/main/${page.source}. Edit the source, then run npm run docs. -->
-  <div class="wrap page">
-    <header>
-      <a class="crumb mono" href="/"><svg class="glyph" viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</a>
-      <h1>${project.name}</h1>
-      <nav class="links mono" aria-label="${project.name}">
-        ${nav}
-      </nav>
-    </header>
-
-    <article class="doc">
-${body}
-      <p class="note"><a href="${project.github}/blob/main/${page.source}">Edit this page on GitHub</a></p>
-    </article>
-
-    <footer class="mono">
-      <span>© <span id="y">2026</span> Quaedra Research</span>
-      <nav>
-        <a href="/contact">Contact</a>
-        <a href="/terms">Terms</a>
-        <a href="/privacy">Privacy</a>
-        <a href="https://github.com/quaedra">GitHub</a>
-        <a href="https://huggingface.co/quaedra">Hugging Face</a>
-      </nav>
-    </footer>
-  </div>
-  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>${usesMermaid ? `
-  <script type="module">
-    // Diagrams in the site's colors, light or dark.
-    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-    const css = getComputedStyle(document.documentElement);
-    const v = (name) => css.getPropertyValue(name).trim();
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: "base",
-      fontFamily: "Inter, system-ui, sans-serif",
-      themeVariables: {
-        background: v("--bg"), primaryColor: v("--surface"), primaryTextColor: v("--fg"),
-        primaryBorderColor: v("--line"), lineColor: v("--muted"), textColor: v("--fg"),
-        clusterBkg: "transparent", clusterBorder: v("--line"), edgeLabelBackground: v("--bg"), fontSize: "13px",
-      },
-    });
-  </script>` : ""}
+<!-- Generated by scripts/build-docs.mjs from ${project.github}/blob/main/${page.source}. Edit the source, then run npm run docs. -->
+<body data-page="doc" data-doc="${project.id}/${name}">
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
 `;

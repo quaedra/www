@@ -3,11 +3,33 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build.mjs",
+    "preview": "npm run build && wrangler dev",
+    "typecheck": "tsc --noEmit -p .",
     "docs": "node scripts/build-docs.mjs",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "sync-nodd": "node scripts/sync-nodd.mjs",
+    "og": "scripts/build-og.sh",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "dependencies": {
+    "@nodd/browser": "file:../nodd/web/packages/browser",
+    "@nodd/core": "file:../nodd/web/packages/core",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "marked": "^16.0.0"
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "marked": "^16.0.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "wrangler": "^4.148.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20261006.1": true
   }
 }

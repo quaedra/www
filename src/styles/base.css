@@ -1,0 +1,81 @@
+/* Shared by every page on quaedra.com, Nodd included: colors, type, the page column, the header
+   (site mark, title, project menu, key figures) and the footer. Page styles live in site.css and
+   src/nodd/nodd.css. Rules here set their own margins so they don't depend on a reset. */
+:root {
+  --bg: #fafaf9;
+  --fg: #18181b;
+  --muted: #71717a;
+  --line: #e4e4e7;
+  --accent: #16a34a;
+  --surface: #f2f2f0;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --neg: #e34948;
+  --grid: #e4e4e7;
+  --logo: #1d302b;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c0c0d;
+    --fg: #f4f4f5;
+    --muted: #8b8b93;
+    --line: #232326;
+    --accent: #4ade80;
+    --surface: #161618;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --neg: #e66767;
+    --grid: #26262a;
+    --logo: #f4f4f5;
+  }
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.6 Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a, a:visited { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); }
+a:hover { border-color: var(--fg); }
+.mono { font-family: var(--mono); font-size: 13px; }
+
+.wrap {
+  box-sizing: border-box;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 96px 24px 64px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 960px) { .wrap { max-width: 880px; } }
+.wrap.wide { max-width: 1200px; }
+
+h1 { margin: 0; font-size: 28px; font-weight: 500; letter-spacing: -0.02em; }
+.lede { color: var(--muted); margin: 12px 0 0; max-width: 46ch; font-size: 16px; }
+header .mark { display: block; width: 36px; height: 31px; color: var(--logo); margin-bottom: 40px; }
+header a.home { border: 0; }
+.crumb { color: var(--muted); border: 0; display: inline-block; margin-bottom: 40px; }
+.crumb:hover { color: var(--fg); }
+.crumb .glyph { width: 15px; height: 13px; color: var(--logo); vertical-align: -2px; margin-right: 8px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px; color: var(--muted); }
+.links a[aria-current="page"] { color: var(--fg); border-color: var(--fg); }
+.kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.kv div { border-top: 1px solid var(--line); padding-top: 12px; }
+.kv b { display: block; font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+.kv span { color: var(--muted); font-size: 13px; }
+@media (max-width: 520px) { .kv { grid-template-columns: 1fr 1fr; } }
+
+footer {
+  margin-top: auto;
+  padding-top: 96px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 20px;
+  color: var(--muted);
+}
+footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+@media (max-width: 520px) { footer { flex-direction: column-reverse; gap: 16px; } }

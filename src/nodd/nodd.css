@@ -1,0 +1,108 @@
+/* Nodd's pages: forms, tables, the classifier and training UI. The page chrome comes from base.css. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap");
+@import "../styles/base.css";
+
+:root { color-scheme: light dark; }
+.wrap > main { flex: 1; }
+header + main { margin-top: 56px; }
+.note { color: var(--muted); font-size: 13px; }
+h2.title { font: 500 20px Inter, system-ui, sans-serif; color: var(--fg); text-transform: none; letter-spacing: -0.01em; margin: 0 0 8px; }
+main > section:first-child > h2:first-child { margin-top: 0; }
+
+h2 { font-size: 13px; font-family: var(--mono); font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 56px 0 12px; }
+h2 .muted { text-transform: none; letter-spacing: 0; }
+h3 { font-size: 16px; font-weight: 500; margin: 32px 0 6px; }
+p { color: var(--muted); font-size: 15px; }
+b, strong { color: var(--fg); font-weight: 500; }
+li { color: var(--muted); font-size: 15px; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+.cols > section > :first-child { margin-top: 8px; }
+.cols > section { min-width: 0; }
+.cols.tight { gap: 20px; }
+.cols + .cols { margin-top: 32px; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+
+code, pre, textarea { font: 12.5px/1.6 var(--mono); }
+code { background: var(--surface); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--surface); padding: 16px; overflow-x: auto; border-radius: 8px; color: var(--fg); }
+pre code { background: none; padding: 0; }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 400; color: var(--muted); }
+.scroll { overflow-x: auto; }
+.scroll th, .scroll td { white-space: nowrap; }
+
+textarea, select, input:not([type=file]):not([type=checkbox]):not([type=radio]) {
+  color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+}
+textarea { display: block; width: 100%; box-sizing: border-box; min-height: 140px; padding: 10px; resize: vertical; font-size: 14px; }
+select {
+  font: inherit; font-size: 14px; padding: 6px 28px 6px 8px; appearance: none; cursor: pointer;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2371717a' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+}
+select:focus, textarea:focus, input:focus { outline: 1px solid var(--fg); outline-offset: -1px; }
+button {
+  font: inherit; font-size: 14px; padding: 7px 14px; cursor: pointer;
+  background: var(--fg); color: var(--bg); border: 1px solid var(--fg); border-radius: 6px;
+}
+button:hover { opacity: 0.85; }
+button:disabled { opacity: 0.5; cursor: default; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs button { background: none; color: var(--muted); border: 0; border-radius: 0; padding: 6px 12px; border-bottom: 1px solid transparent; margin-bottom: -1px; font: 400 13px var(--mono); }
+.tabs button:hover { color: var(--fg); opacity: 1; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+.usage pre { margin: 8px 0 0; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 12px 0; }
+.controls label { color: var(--muted); font-size: 14px; }
+.controls select { max-width: 100%; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+.raw-output { margin-top: 16px; font-size: 13px; color: var(--muted); }
+.raw-output summary { cursor: pointer; }
+.raw-output summary:focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+.raw-output pre { margin-top: 8px; }
+
+.examples { margin: 8px 0 0; padding: 0; list-style: none; font-size: 14px; }
+.examples li { display: inline; }
+.examples li + li::before { content: " · "; color: var(--muted); }
+.examples a { cursor: pointer; }
+
+.probs { width: auto; margin-top: 4px; }
+.probs td { padding: 2px 12px 2px 0; border: 0; color: var(--muted); }
+.probs .num { text-align: right; font-variant-numeric: tabular-nums; }
+.probs tr.best td { color: var(--fg); font-weight: 500; }
+table.kv { width: auto; }
+
+.loadbar { height: 4px; max-width: 320px; background: var(--surface); margin: 4px 0 12px; border-radius: 2px; overflow: hidden; }
+.loadbar div { height: 100%; background: var(--s1); transition: width .15s; }
+.bar { display: inline-block; height: 8px; background: var(--s1); border-radius: 4px; vertical-align: middle; }
+.num { font-variant-numeric: tabular-nums; }
+
+.model-list { padding: 0; list-style: none; }
+.model-list li { padding: 20px 0; border-bottom: 1px solid var(--line); }
+.model-list li:first-child { border-top: 1px solid var(--line); }
+.model-list h2 { margin: 0 0 4px; font: 500 16px Inter, system-ui, sans-serif; color: var(--fg); text-transform: none; letter-spacing: 0; }
+.model-list h2 .muted { font-size: 15px; font-weight: 400; }
+.model-list p { margin: 4px 0 0; }
+
+.pass { color: var(--accent); }
+.fail, .esc { color: var(--neg); }
+
+
+th.num, td.num { text-align: right; }
+td code { overflow-wrap: anywhere; } /* long identifiers wrap in narrow columns */
+[hidden] { display: none !important; }
+
+.training-fields { margin: 24px 0 12px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.training-fields > label, .training-fields > input { display: block; margin: 8px 0; }
+.training-fields input { max-width: 100%; box-sizing: border-box; }
+.training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 12px 0; }
+.training-grid input, .training-grid select { display: block; width: 100%; box-sizing: border-box; }
+.training-fields input:not([type=file]) { font: inherit; padding: 6px 8px; }
+.training-help { margin-top: 32px; }
+progress { width: 100%; margin-top: 8px; accent-color: var(--s1); }

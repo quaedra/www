@@ -1,0 +1,10 @@
+# Nodd's pages are crossOriginIsolated (multi-threaded WASM for onnxruntime-web), and so is
+# everything they load: their pages and model files under /nodd/, the built JS under /assets/.
+/nodd/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
+/assets/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin

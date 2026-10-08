@@ -3,8 +3,11 @@
   "name": "quaedra-www",
   "account_id": "24448fc5d4c7726e7ed1cdfda7a4dacd",
   "compatibility_date": "2026-10-01",
+  "main": "worker/index.js",
+  // Built by scripts/build.mjs; the directory mirrors the URL path, with clean URLs (/nodd/train).
   "assets": {
-    "directory": "./public",
+    "directory": "./dist",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash"
   },
   "routes": [
