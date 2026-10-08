@@ -202,3 +202,5 @@ details.table summary { cursor: pointer; }
 .doc img { max-width: 100%; border-radius: 8px; }
 .doc p.note { font-size: 13px; margin-top: 48px; }
 .page section > p.aside { font-size: 13px; }
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scroll-x table.data td, .scroll-x table.data th { white-space: nowrap; }
