@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Open Graph card, 1200x630. Rendered by scripts/build-og.sh: card.html?title=...&sub=...&stats=a|b|c -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { background: #fafaf9; color: #18181b; font-family: Inter, system-ui, sans-serif; position: relative; }
+  .pad { position: absolute; inset: 72px 88px; display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 14px; font: 400 24px "JetBrains Mono", monospace; color: #71717a; }
+  .brand svg { width: 38px; height: 33px; color: #18181b; }
+  h1 { font-weight: 500; font-size: 92px; letter-spacing: -2px; line-height: 1.05; margin: auto 0 0; }
+  p { font-size: 34px; line-height: 1.35; color: #52525b; margin: 22px 0 0; max-width: 980px; }
+  .stats { display: flex; gap: 48px; margin-top: 40px; font: 400 26px "JetBrains Mono", monospace; color: #71717a; }
+  .stats b { display: block; font: 500 40px Inter, sans-serif; color: #18181b; margin-bottom: 4px; }
+  .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: #eb6834; }
+</style>
+</head>
+<body>
+  <div class="pad">
+    <div class="brand"><svg viewBox="136 112 242 208" aria-hidden="true"><path fill="currentColor" transform="translate(91.1667 386.1667) scale(0.64 -0.64)" d="M74 422H134Q143 264 252 264Q362 264 381 422H441Q428 290 336 231Q376 163 436 183L444 153Q356 111 278 206Q265 204 252 204Q106 204 74 422Z"/></svg>Quaedra Research</div>
+    <h1 id="t"></h1>
+    <p id="s"></p>
+    <div class="stats" id="st"></div>
+  </div>
+  <div class="bar"></div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    document.getElementById("t").textContent = q.get("title") || "";
+    document.getElementById("s").textContent = q.get("sub") || "";
+    const st = document.getElementById("st");
+    for (const item of (q.get("stats") || "").split("|").filter(Boolean)) {
+      const [v, label] = item.split("~");
+      const d = document.createElement("div");
+      d.innerHTML = "<b></b><span></span>";
+      d.querySelector("b").textContent = v;
+      d.querySelector("span").textContent = label;
+      st.appendChild(d);
+    }
+    if (!st.children.length) st.remove();
+  </script>
+</body>
+</html>
