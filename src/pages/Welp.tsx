@@ -123,8 +123,14 @@ export default function Welp() {
       <section>
         <h2 className="mono" id="run-it">Run it</h2>
         <p>Welp uses only standard llama.cpp formats, the same as UD-IQ3_XXS. Download it from Hugging Face: <a href="https://huggingface.co/quaedra/Welp-35B-A3B-GGUF">quaedra/Welp-35B-A3B-GGUF</a>. Recipe, scripts and evals are on <a href="https://github.com/quaedra/welp">GitHub</a>.</p>
-        <pre>{`llama-server -m Welp-35B-A3B.gguf -ngl 99 -fa on -c 262144 \\
+        <p>Download and serve in one step (llama.cpp caches the file):</p>
+        <pre>{`llama-server -hf quaedra/Welp-35B-A3B-GGUF -hff Welp-35B-A3B.gguf \\
+  -ngl 99 -fa on -c 262144 -ctk q4_0 -ctv q4_0 -ub 256 --jinja`}</pre>
+        <p>Or download the file first and point <span className="mono">-m</span> at it:</p>
+        <pre>{`hf download quaedra/Welp-35B-A3B-GGUF Welp-35B-A3B.gguf --local-dir .
+llama-server -m Welp-35B-A3B.gguf -ngl 99 -fa on -c 262144 \\
   -ctk q4_0 -ctv q4_0 -ub 256 --jinja`}</pre>
+        <p className="note">The server speaks the OpenAI API at <span className="mono">http://localhost:8080/v1</span>, so coding agents such as opencode can use it directly.</p>
         <p className="note">For a more precise KV cache at half the context, use <span className="mono">-c 131072 -ctk q8_0 -ctv q8_0</span>.</p>
         <p className="note aside">Thanks to the Qwen team for the base model, Unsloth for the UD-IQ3_XXS format mix, and llama.cpp for the formats.</p>
       </section>
