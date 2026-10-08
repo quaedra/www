@@ -7,3 +7,4 @@ dist/
 public/nodd/models/
 public/nodd/ort/
 public/nodd/training/
+.cache/

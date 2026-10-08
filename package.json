@@ -9,6 +9,8 @@
     "typecheck": "tsc --noEmit -p .",
     "docs": "node scripts/build-docs.mjs",
     "sync-nodd": "node scripts/sync-nodd.mjs",
+    "nodd:pull": "node scripts/nodd-files.mjs pull",
+    "nodd:push": "node scripts/nodd-files.mjs push",
     "og": "scripts/build-og.sh",
     "deploy": "npm run build && wrangler deploy"
   },

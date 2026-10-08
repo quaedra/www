@@ -5,13 +5,46 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# One deploy at a time; a newer push replaces a queued one.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # The site builds @nodd/browser and @nodd/core from the Nodd repository, checked out beside it.
       - uses: actions/checkout@v4
-      - uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          wranglerVersion: "4"
-          command: deploy
+          path: www
+      - uses: actions/checkout@v4
+        with:
+          repository: quaedra/nodd
+          path: nodd
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            www/package-lock.json
+            nodd/web/package-lock.json
+      - name: Install
+        run: |
+          npm ci --prefix nodd/web
+          npm ci --prefix www
+          pipx install huggingface_hub
+      # Nodd's models, onnxruntime files and training base model (not in git).
+      - name: Download Nodd's site files
+        working-directory: www
+        run: npm run nodd:pull
+      - name: Build
+        working-directory: www
+        run: |
+          npm run typecheck
+          npm run build
+      - name: Deploy
+        working-directory: www
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
