@@ -47,15 +47,37 @@
 
     <section>
       <h2 class="mono" id="benchmarks">Benchmarks</h2>
-      <h3>HumanEval pass@1</h3>
+      <h3>Fig I: HumanEval pass@1</h3>
       <p class="note" style="margin-top:0">164 problems, thinking off, temperature 0. Same harness for every model, RTX 4080 Super. Every model here fits on a 16 GB GPU.</p>
       <div class="chart" id="he"></div>
-      <h3>Decode speed</h3>
+      <h3>Fig II: Decode speed</h3>
       <p class="note" style="margin-top:0">Tokens per second, llama-bench tg128.</p>
       <div class="chart" id="speed"></div>
-      <h3>Prefill speed</h3>
+      <h3>Fig III: Prefill speed</h3>
       <p class="note" style="margin-top:0">Tokens per second, llama-bench pp4096.</p>
       <div class="chart" id="prefill"></div>
+      <h3>Fig IV: Performance vs size (log scale)</h3>
+      <p class="note" style="margin-top:0">HumanEval pass@1 against GGUF size, same harness and card as Fig I. Points to the upper left are better. The dashed line joins the best Qwen3.6-35B-A3B quantization at each size; Welp moves it up at 13.21 GB.</p>
+      <div class="chart" id="size"></div>
+      <div class="legend" aria-hidden="true"><span><i class="circle" style="background:var(--s2)"></i>Welp</span><span><i class="circle" style="background:var(--s1)"></i>Other Qwen3.6-35B-A3B quants</span><span><i class="diamond" style="background:var(--muted)"></i>Other base models</span><span><i class="dash"></i>Qwen3.6-35B-A3B frontier</span></div>
+      <details class="table"><summary>Show as table</summary>
+      <div class="scroll-x">
+      <table class="data">
+        <thead><tr><th>Model</th><th>Base</th><th class="n">GB</th><th class="n">HumanEval</th></tr></thead>
+        <tbody>
+          <tr><td>Ternary experts (research)</td><td>Qwen3.6-35B-A3B</td><td class="n">8.64</td><td class="n">78.7%</td></tr>
+          <tr><td>IQ2_XXS</td><td>Qwen3.6-35B-A3B</td><td class="n">9.50</td><td class="n">84.8%</td></tr>
+          <tr><td>Ternary experts, Q2_K down (research)</td><td>Qwen3.6-35B-A3B</td><td class="n">9.82</td><td class="n">90.9%</td></tr>
+          <tr><td><b>Welp-35B-A3B</b></td><td>Qwen3.6-35B-A3B</td><td class="n">13.21</td><td class="n">95.7%</td></tr>
+          <tr><td>UD-IQ3_XXS (Unsloth)</td><td>Qwen3.6-35B-A3B</td><td class="n">13.21</td><td class="n">93.9%</td></tr>
+          <tr><td>Q4_K_M</td><td>Qwen3.6-35B-A3B</td><td class="n">21.17</td><td class="n">95.7%</td></tr>
+          <tr><td>Bonsai 2 27B</td><td>Qwen3.8-27B</td><td class="n">5.95</td><td class="n">91.5%</td></tr>
+          <tr><td>UD-Q3_K_XL</td><td>Qwen3.8-27B</td><td class="n">13.15</td><td class="n">96.3%</td></tr>
+        </tbody>
+      </table>
+      </div>
+      </details>
+      <p class="note">Welp ties Q4_K_M (157 of 164) at 62% of its size; Q4_K_M does not fit on a 16 GB card. The two ternary builds are Quaedra research quantizations from the <a href="https://github.com/quaedra/welp">Welp log</a> and are not released. One HumanEval problem is 0.6 points.</p>
       <div class="scroll-x">
       <table class="data">
         <thead><tr><th>Model</th><th class="n">GB</th><th class="n">HumanEval</th><th class="n">Long-exact</th><th class="n">Context</th><th class="n">Decode tok/s</th><th class="n">Prefill tok/s</th></tr></thead>
@@ -96,7 +118,7 @@
   </div>
   <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
   <script type="module">
-    import { barChart } from "/charts.js";
+    import { barChart, scatterChart } from "/charts.js";
 
     const mark = (rows, opts) => ({
       rows: rows.map(([n, v]) => ({ label: n, values: [v], color: n.startsWith("Welp") ? "var(--s2)" : undefined })),
@@ -117,6 +139,30 @@
     barChart(document.getElementById("prefill"), mark([
       ["UD-IQ3_XXS", 5165], ["Welp-35B-A3B", 5111], ["Bonsai 2 27B", 2278], ["Qwen3.8-27B", 2155],
     ], { name: "tok/s", min: 0, max: 6000, ticks: [0, 2000, 4000, 6000], fmt: (v) => v.toLocaleString("en-US") }));
+    // HumanEval pass@1 against GGUF size, RTX 4080 Super; results/humaneval in quaedra/welp
+    const q36 = (label, x, y, side) => ({ label, x, y, side, group: "q36", base: "Qwen3.6-35B-A3B" });
+    scatterChart(document.getElementById("size"), {
+      points: [
+        q36("Ternary", 8.64, 78.66, "r"),
+        q36("IQ2_XXS", 9.50, 84.76, "r"),
+        q36("Ternary + Q2_K", 9.82, 90.85, "r"),
+        { label: "Welp", x: 13.21, y: 95.73, side: "r", group: "focus", base: "Qwen3.6-35B-A3B" },
+        q36("UD-IQ3_XXS", 13.21, 93.9, "r"),
+        q36("Q4_K_M", 21.17, 95.73, "t"),
+        { label: "Bonsai 2 27B", x: 5.95, y: 91.46, side: "t", group: "other", base: "Qwen3.8-27B" },
+        { label: "Qwen3.8-27B", x: 13.15, y: 96.34, side: "l", group: "other", base: "Qwen3.8-27B" },
+      ],
+      groups: {
+        focus: { name: "Welp", color: "var(--s2)" },
+        q36: { name: "Qwen3.6-35B-A3B", color: "var(--s1)" },
+        other: { name: "Other base models", color: "var(--muted)", shape: "diamond" },
+      },
+      line: ["Ternary", "IQ2_XXS", "Ternary + Q2_K", "Welp"],
+      vline: { x: 16, label: "16 GB card" },
+      x: { min: 5, max: 26, ticks: [6, 8, 12, 16, 24], fmt: (v) => +v.toFixed(2) + " GB", title: "GGUF size (log scale)" },
+      y: { min: 76, max: 100, ticks: [80, 85, 90, 95, 100], fmt: (v) => +v.toFixed(1) + "%", title: "HumanEval pass@1" },
+      tip: (p) => `<b>${p.label}</b><br>${p.base}<br>${p.x.toFixed(2)} GB · ${p.y.toFixed(1)}%`,
+    });
   </script>
 </body>
 </html>

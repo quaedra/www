@@ -109,3 +109,99 @@ export function probBars(container, items, { highlight } = {}) {
     container.appendChild(row);
   }
 }
+
+/**
+ * Scatter plot with a log-scaled x axis.
+ * opts: {
+ *   points: [{ label, x, y, group, side?: "l" | "r" | "t" | "b" }],   // side: where the direct label goes
+ *   groups: { [key]: { name, color, shape?: "circle" | "diamond" } },
+ *   x: { min, max, ticks, fmt, title }, y: { min, max, ticks, fmt, title },
+ *   line?: string[],                 // labels of points joined by a dashed line, in order
+ *   vline?: { x, label },            // a marked threshold on the x axis
+ *   tip?: p => string,
+ * }
+ */
+export function scatterChart(container, opts) {
+  const { points, groups, x, y, line = [], vline, tip: tipFor } = opts;
+
+  function render() {
+    container.querySelector("svg")?.remove();
+    const W = container.clientWidth;
+    const H = W < 480 ? 280 : 320;
+    const m = { l: 58, r: 12, t: 12, b: 40 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const sx = (v) => m.l + (Math.log(v / x.min) / Math.log(x.max / x.min)) * pw;
+    const sy = (v) => m.t + (1 - (v - y.min) / (y.max - y.min)) * ph;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img" });
+
+    for (const t of y.ticks) {
+      el("line", { class: "grid", x1: m.l, x2: W - m.r, y1: sy(t), y2: sy(t) }, svg);
+      const tx = el("text", { x: m.l - 8, y: sy(t) + 4, "text-anchor": "end" }, svg);
+      tx.textContent = y.fmt(t);
+    }
+    for (const t of x.ticks) {
+      el("line", { class: "grid", x1: sx(t), x2: sx(t), y1: m.t, y2: H - m.b }, svg);
+      const tx = el("text", { x: sx(t), y: H - m.b + 16, "text-anchor": "middle" }, svg);
+      tx.textContent = x.fmt(t);
+    }
+    const xt = el("text", { x: m.l + pw / 2, y: H - 4, "text-anchor": "middle" }, svg);
+    xt.textContent = x.title;
+    const yt = el("text", { x: 0, y: 0, "text-anchor": "middle", transform: `translate(11 ${m.t + ph / 2}) rotate(-90)` }, svg);
+    yt.textContent = y.title;
+
+    if (vline) {
+      el("line", { class: "vline", x1: sx(vline.x), x2: sx(vline.x), y1: m.t, y2: H - m.b }, svg);
+      const vt = el("text", { x: sx(vline.x) - 6, y: m.t + 12, "text-anchor": "end" }, svg);
+      vt.textContent = vline.label;
+    }
+
+    const byLabel = Object.fromEntries(points.map((p) => [p.label, p]));
+    if (line.length > 1) {
+      const lp = line.map((l) => byLabel[l]);
+      el("polyline", {
+        class: "frontier",
+        points: lp.map((p) => `${sx(p.x)},${sy(p.y)}`).join(" "),
+        stroke: groups[lp[0].group].color,
+      }, svg);
+    }
+
+    const dots = points.map((p) => {
+      const g = groups[p.group];
+      const cx = sx(p.x), cy = sy(p.y);
+      const r = p.group === "focus" ? 6 : 5;
+      const mark = g.shape === "diamond"
+        ? el("rect", { class: "dot", x: cx - r * 0.8, y: cy - r * 0.8, width: r * 1.6, height: r * 1.6, rx: 1.5, transform: `rotate(45 ${cx} ${cy})`, fill: g.color }, svg)
+        : el("circle", { class: "dot", cx, cy, r, fill: g.color }, svg);
+      const side = p.side || "r";
+      const lx = side === "l" ? cx - r - 6 : side === "r" ? cx + r + 6 : cx;
+      const ly = side === "t" ? cy - r - 6 : side === "b" ? cy + r + 14 : cy + 4;
+      const lt = el("text", { class: p.group === "focus" ? "v" : "", x: lx, y: ly, "text-anchor": side === "l" ? "end" : side === "r" ? "start" : "middle" }, svg);
+      lt.textContent = p.label;
+      return { p, cx, cy, mark };
+    });
+    // Raise the focus mark above its group, and diamonds above both, so overlapping marks stay visible.
+    for (const d of dots) if (d.p.group === "focus") svg.appendChild(d.mark);
+    for (const d of dots) if (groups[d.p.group].shape === "diamond") svg.appendChild(d.mark);
+
+    svg.addEventListener("pointermove", (e) => {
+      const r = svg.getBoundingClientRect();
+      const px = ((e.clientX - r.left) / r.width) * W, py = ((e.clientY - r.top) / r.height) * H;
+      let best = null, bd = 24 * 24;
+      for (const d of dots) {
+        const dd = (d.cx - px) ** 2 + (d.cy - py) ** 2;
+        if (dd < bd) { bd = dd; best = d; }
+      }
+      for (const d of dots) d.mark.classList.toggle("on", d === best);
+      if (best) showTip(e, tipFor ? tipFor(best.p) : `<b>${best.p.label}</b><br>${x.fmt(best.p.x)}, ${y.fmt(best.p.y)}`);
+      else hideTip();
+    });
+    svg.addEventListener("pointerleave", () => { hideTip(); for (const d of dots) d.mark.classList.remove("on"); });
+    container.appendChild(svg);
+  }
+
+  render();
+  let w = container.clientWidth;
+  new ResizeObserver(() => {
+    if (container.clientWidth !== w) { w = container.clientWidth; render(); }
+  }).observe(container);
+}
