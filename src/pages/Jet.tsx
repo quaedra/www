@@ -101,7 +101,7 @@ export default function Jet() {
         ["Decision Index", "/jet/docs/decision-index"],
         ["Training history", "/jet/docs/training-history"],
         ["GitHub", "https://github.com/quaedra/jet"],
-        ["Weights", "https://huggingface.co/quaedra/jet"],
+        ["Hugging Face", "https://huggingface.co/quaedra/jet"],
       ]}
       intro={<KeyFigures items={[["Jet-4B", "Latest model, v6.2"], ["bf16", "Merged weights, 8.4 GB"], ["40.0", "Decision Index 0.3, #52 of 113"]]} />}
     >

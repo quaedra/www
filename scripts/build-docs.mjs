@@ -26,7 +26,7 @@ const projects = [
     id: "jet",
     name: "Jet",
     github: "https://github.com/quaedra/jet",
-    links: [["Weights", "https://huggingface.co/quaedra/jet"]],
+    links: [["Hugging Face", "https://huggingface.co/quaedra/jet"]],
     pages: [
       { source: "README.md", slug: "", title: "Docs", description: "Jet's prompt format, local runtime, training pipeline and project layout." },
       { source: "docs/decision-index.md", slug: "decision-index", title: "Decision Index", description: "Jet-4B's official Decision Index 0.3 result and how to run the benchmark yourself." },
