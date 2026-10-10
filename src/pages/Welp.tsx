@@ -50,7 +50,7 @@ export default function Welp() {
       name="Welp"
       lede="Welp-35B-A3B is Qwen3.6-35B-A3B in 13.21 GB. It runs on a 16 GB GPU with the full 262k context, and scores higher than Unsloth's UD-IQ3_XXS at exactly the same size."
       menu={[["Overview", "/welp", true], ["Benchmarks", "#benchmarks"], ["Run it", "#run-it"], ["GitHub", "https://github.com/quaedra/welp"], ["Hugging Face", "https://huggingface.co/quaedra/Welp-35B-A3B-GGUF"]]}
-      intro={<KeyFigures items={[["13.21 GB", "GGUF file"], ["262k", "context on 16 GB"], ["95.7%", "HumanEval pass@1"]]} />}
+      intro={<KeyFigures items={[["13.21 GB", "GGUF file"], ["262k", "context on 16 GB"], ["164 tok/s", "decode on 16 GB"], ["95.7%", "HumanEval pass@1"]]} />}
     >
       <section>
         <h2 className="mono">How it works</h2>
