@@ -1,8 +1,10 @@
 // Search and link-preview tags for every page, derived from what each HTML entry under pages/
 // already says (its <title>, description and og:* tags) and its URL, so they stay consistent:
 // canonical URL, og:url, og:locale, Twitter/X card tags, theme colors, icons and JSON-LD
-// (the organization on the home page, breadcrumbs, articles for docs, source code for projects).
+// (the organization on the home page, breadcrumbs, articles for docs, source code for projects,
+// software applications and their FAQs for products).
 // The build also writes sitemap.xml and robots.txt from the same rules (see scripts/build.mjs).
+import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import type { Plugin } from "vite";
 
@@ -18,6 +20,24 @@ const REPOSITORIES: Record<string, string> = {
   "/jet": "https://github.com/quaedra/jet",
   "/megacode": "https://github.com/quaedra/megacode",
   "/nodd/": "https://github.com/quaedra/nodd",
+};
+
+/** Products sold rather than published as source: SoftwareApplication, plus their FAQ (shown on the page too). */
+const APPLICATIONS: Record<string, { name: string; category: string; os: string; features: string[]; faq?: string }> = {
+  "/ent": {
+    name: "ent",
+    category: "BusinessApplication",
+    os: "macOS, Linux",
+    features: [
+      "Private AI model fine-tuned on company data",
+      "Runs on-premise, no hosted AI APIs",
+      "Answers cite their sources",
+      "Connects to Confluence, Jira, Slack, Google Drive, SharePoint, OneDrive, Microsoft Teams, SQL databases and MCP servers",
+      "Redaction of secrets and personal data",
+      "Per-source control over training and retrieval",
+    ],
+    faq: "../src/data/ent-faq.json",
+  },
 };
 
 const ORGANIZATION = {
@@ -56,7 +76,7 @@ function breadcrumbs(title: string, path: string) {
   if (parts.length > 3) return null;
   return {
     "@type": "BreadcrumbList",
-    itemListElement: parts.map((name, i) => ({ "@type": "ListItem", position: i + 1, name, item: SITE + urls[i] })),
+    itemListElement: parts.map((name, i) => ({ "@type": "ListItem", position: i + 1, name: name.split(": ")[0], item: SITE + urls[i] })),
   };
 }
 
@@ -90,6 +110,26 @@ function jsonLd(path: string, title: string, description: string) {
       codeRepository: REPOSITORIES[path],
       author: { "@id": ORGANIZATION["@id"] },
     });
+  }
+  const app = APPLICATIONS[path];
+  if (app) {
+    graph.push({
+      "@type": "SoftwareApplication",
+      name: app.name,
+      description,
+      url,
+      applicationCategory: app.category,
+      operatingSystem: app.os,
+      featureList: app.features,
+      publisher: { "@id": ORGANIZATION["@id"] },
+    });
+    if (app.faq) {
+      const items: { q: string; a: string }[] = JSON.parse(readFileSync(new URL(app.faq, import.meta.url), "utf8"));
+      graph.push({
+        "@type": "FAQPage",
+        mainEntity: items.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      });
+    }
   }
   if (path !== "/" && graph.length) graph.push({ ...ORGANIZATION, sameAs: undefined, email: undefined });
   return graph.length ? { "@context": "https://schema.org", "@graph": graph } : null;

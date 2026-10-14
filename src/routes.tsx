@@ -8,6 +8,7 @@ const pages: Record<string, () => Promise<{ default: ComponentType }>> = {
   welp: () => import("./pages/Welp"),
   jet: () => import("./pages/Jet"),
   megacode: () => import("./pages/Megacode"),
+  ent: () => import("./pages/Ent"),
   contact: () => import("./pages/Contact"),
   terms: () => import("./pages/Terms"),
   privacy: () => import("./pages/Privacy"),

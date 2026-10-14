@@ -2,6 +2,12 @@ import { SiteLayout } from "../ui/Layout";
 
 const PROJECTS: { name: string; href?: string; status: [string, "live" | "training"]; desc: string }[] = [
   {
+    name: "ent",
+    href: "/ent",
+    status: ["Early access", "training"],
+    desc: "Your company's own AI model, trained on your documents and tools, running on your hardware and answering with sources.",
+  },
+  {
     name: "Welp",
     href: "/welp",
     status: ["Research build", "training"],

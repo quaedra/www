@@ -1,0 +1,26 @@
+[
+  {
+    "q": "Can we train an AI model on our Confluence, Jira and Slack data without sending it to OpenAI or another AI provider?",
+    "a": "Yes. ent runs entirely on your own infrastructure. It reads your systems, writes its training questions with a local model, and fine-tunes an open-weight model on your hardware. Sending data to a hosted AI service is blocked unless you explicitly allow a server you control."
+  },
+  {
+    "q": "How is ent different from an enterprise search tool or a RAG chatbot?",
+    "a": "A retrieval-only chatbot looks up documents and asks a general-purpose model to summarize them. ent also fine-tunes the model on your company's knowledge, so it understands your products, teams and terminology, and it keeps a private search index for exact, current answers that cite their sources."
+  },
+  {
+    "q": "Which AI model does ent use, and who owns it?",
+    "a": "ent fine-tunes open-weight Qwen3 models, from 1.7B to 32B parameters depending on your hardware. The trained model, the search index and all intermediate data belong to you."
+  },
+  {
+    "q": "What hardware do we need to run a private, on-premise AI model?",
+    "a": "A pilot runs on a single Apple Silicon Mac with 16 GB of memory. Company-wide deployments use a Mac with more memory, a GPU server, or your private cloud."
+  },
+  {
+    "q": "How does ent handle sensitive data and access permissions?",
+    "a": "Secrets, card numbers and phone numbers are redacted before anything is stored. Anything trained into a model can be surfaced to everyone who uses it, so sensitive sources such as contracts, CRM or HR data can be marked retrieval-only: they are searchable and cited, but never enter the model's weights."
+  },
+  {
+    "q": "Which tools and data sources can ent connect to?",
+    "a": "Confluence, Jira, Slack, Google Drive and Docs, SharePoint, OneDrive and Microsoft Teams, plus SQL databases, internal APIs, CSV and JSON exports, and any server that speaks the Model Context Protocol (MCP). Custom systems can be added as connectors."
+  }
+]
