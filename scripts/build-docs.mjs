@@ -2,7 +2,7 @@
 // body and menu as src/docs/<project>/<page>.json (drawn by src/pages/Doc.tsx) and the page's
 // HTML entry with its meta tags as pages/<project>/docs/<page>.html. Images go to public/.
 //
-//   npm run docs                      # reads ../jet and ../megacode
+//   npm run docs                      # reads ../jet, ../megacode and ../verdict
 //   npm run docs -- megacode          # one project
 //   JET_REPO=/path/to/jet MEGACODE_REPO=/path/to/megacode npm run docs
 //
@@ -43,6 +43,18 @@ const projects = [
       { source: "bench/README.md", slug: "benchmark", title: "Benchmark", description: "megacode's harness benchmark: three fixed coding tasks, independent grading, and how to compare other harnesses on them." },
       { source: "bench/gateway-comparison.md", slug: "gateway-comparison", title: "Same-model comparison", nav: false, description: "megacode and Claude Code on the same model, GPT-6 Astra, through one gateway: 30 attempts, five repeats per task." },
       { source: "bench/effort-comparison.md", slug: "effort-comparison", title: "Effort comparison", nav: false, description: "megacode at medium and low reasoning effort on the harness benchmark: 30 attempts, five repeats per task." },
+    ],
+  },
+  {
+    id: "verdict",
+    name: "Verdict",
+    github: "https://github.com/quaedra/verdict",
+    links: [["npm", "https://www.npmjs.com/package/@quaedra/verdict"]],
+    pages: [
+      { source: "README.md", slug: "", title: "Docs", description: "Getting started with Verdict: the .vd language, the TypeScript library, decision types, escalation tiers and the CLI." },
+      { source: "docs/LANGUAGE.md", slug: "language", title: "Language", description: "The Verdict language reference: decisions, exhaustive match with an uncertain arm, confidence guards, types and the checker's errors." },
+      { source: "docs/SPEC.md", slug: "design", title: "Design", description: "Verdict's design: decisions as a primitive, escalation chains across builtin, Nodd and Jet, batching, calibration and artifacts." },
+      { source: "docs/ROADMAP.md", slug: "roadmap", title: "Roadmap", description: "What Verdict does today and what comes next: a live Jet, distilling into Nodd, React hooks and a learning loop." },
     ],
   },
 ];

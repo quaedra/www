@@ -20,6 +20,12 @@ const PROJECTS: { name: string; href?: string; status: [string, "live" | "traini
     desc: "A minimal coding agent for the terminal, for Anthropic, OpenAI, Gemini and any OpenAI-compatible or local model.",
   },
   {
+    name: "Verdict",
+    href: "/verdict",
+    status: ["Preview", "training"],
+    desc: "A programming language where decisions are the branches. Every answer and “not sure” must be handled, and models escalate from builtin to Nodd to Jet.",
+  },
+  {
     name: "Jet",
     href: "/jet",
     status: ["Released", "live"],

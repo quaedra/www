@@ -1,0 +1,38 @@
+{
+  "project": "Verdict",
+  "title": "Roadmap",
+  "menu": [
+    [
+      "Overview",
+      "/verdict"
+    ],
+    [
+      "Docs",
+      "/verdict/docs/"
+    ],
+    [
+      "Language",
+      "/verdict/docs/language"
+    ],
+    [
+      "Design",
+      "/verdict/docs/design"
+    ],
+    [
+      "Roadmap",
+      "/verdict/docs/roadmap",
+      true
+    ],
+    [
+      "GitHub",
+      "https://github.com/quaedra/verdict"
+    ],
+    [
+      "npm",
+      "https://www.npmjs.com/package/@quaedra/verdict"
+    ]
+  ],
+  "source": "https://github.com/quaedra/verdict/blob/main/docs/ROADMAP.md",
+  "mermaid": false,
+  "html": "<h2 id=\"m0--poc-this-repo-\">M0 — PoC (this repo) ✅</h2>\n<ul>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> <code>choice</code> / <code>noul</code> / <code>score</code> decisions with typed examples, validated at definition</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> <code>match</code> with compile-time exhaustiveness and a required <code>uncertain</code> arm; <code>at()</code> guards</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Escalation chain, <code>decideAll</code> with per-tier batching</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Backends: <code>builtin()</code> (trained from examples, calibrated), <code>jet()</code> (HTTP <code>/v1/decide</code>),\n<code>nodd()</code> (wraps <code>@nodd/node</code>), <code>fn()</code></li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> <code>verdict build</code> / <code>check</code> / <code>eval</code> / <code>label</code> CLI, <code>.verdict/</code> artifacts</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> JSONL trace</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Examples: comment moderation (1,711 rows from Nodd), support triage with <code>decideAll</code></li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Tests: runtime (<code>node:test</code>) + type tests (<code>tsc</code> with <code>@ts-expect-error</code>)</li>\n</ul>\n<h2 id=\"m05--own-syntax-\">M0.5 — Own syntax ✅</h2>\n<ul>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> <code>.vd</code> lexer, parser, checker (exhaustive match, label checks, types), interpreter</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Guarded fall-through arms (<code>high @ 0.8 =&gt; …</code> then <code>high =&gt; …</code>)</li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> <code>verdict run | check</code>, and build/eval/label/questions accept <code>.vd</code></li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> VS Code syntax highlighting (<code>editors/vscode</code>)</li>\n<li><input disabled=\"\" type=\"checkbox\"> Language server: diagnostics from the checker, hover shows a decision&#39;s labels</li>\n<li><input disabled=\"\" type=\"checkbox\"> Records/structs, <code>else</code> in match for non-decision values, modules (<code>import &quot;x.vd&quot;</code>)</li>\n<li><input disabled=\"\" type=\"checkbox\"> Compile <code>.vd</code> to TypeScript (same runtime) instead of interpreting</li>\n</ul>\n<h2 id=\"m1--real-stack-end-to-end\">M1 — Real stack end to end</h2>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> Run <code>examples/</code> against a live Jet (local <code>jet-serve</code> or the HF Space)</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>verdict label</code> → <code>nodd run</code> → <code>nodd()</code> tier: one script that distills a decision from\nJet into a Nodd model and wires it into the chain</li>\n<li><input disabled=\"\" type=\"checkbox\"> Check that Jet&#39;s choice keys and Nodd&#39;s labels match the decision at load (done for\nNodd; add a dry-run for Jet)</li>\n</ul>\n<h2 id=\"m2--react\">M2 — React</h2>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>useDecision(D, input)</code> hook: debounced, suspense-friendly, runs <code>builtin</code>/<code>nodd</code> in a\nworker, escalates to Jet through the app&#39;s own endpoint (keys stay server-side)</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>&lt;Decide on={…}&gt;</code> with typed render props per label + <code>uncertain</code></li>\n</ul>\n<h2 id=\"m3--learning-loop\">M3 — Learning loop</h2>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>verdict retrain</code>: take escalated cases from the trace, label them with the top tier,\nadd to the examples, rebuild, show the metric diff, fail CI on regression</li>\n<li><input disabled=\"\" type=\"checkbox\"> Per-decision drift alarm: share of escalations over time</li>\n</ul>\n<h2 id=\"m4--language\">M4 — Language</h2>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> TS compiler plugin / ESLint rule: flag <code>decide()</code> results used without <code>match</code></li>\n<li><input disabled=\"\" type=\"checkbox\"> Optional <code>.verdict</code> syntax compiling to the TS embedding, if the TS form hits limits</li>\n<li><input disabled=\"\" type=\"checkbox\"> Policy arms: <code>@ p &gt; 0.9</code> sugar, cost budgets per decision (<code>maxTier: &quot;nodd&quot;</code> in the browser)</li>\n</ul>\n"
+}

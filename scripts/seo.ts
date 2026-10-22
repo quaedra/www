@@ -19,6 +19,7 @@ const REPOSITORIES: Record<string, string> = {
   "/welp": "https://github.com/quaedra/welp",
   "/jet": "https://github.com/quaedra/jet",
   "/megacode": "https://github.com/quaedra/megacode",
+  "/verdict": "https://github.com/quaedra/verdict",
   "/nodd/": "https://github.com/quaedra/nodd",
 };
 

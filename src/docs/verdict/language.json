@@ -1,0 +1,38 @@
+{
+  "project": "Verdict",
+  "title": "Language",
+  "menu": [
+    [
+      "Overview",
+      "/verdict"
+    ],
+    [
+      "Docs",
+      "/verdict/docs/"
+    ],
+    [
+      "Language",
+      "/verdict/docs/language",
+      true
+    ],
+    [
+      "Design",
+      "/verdict/docs/design"
+    ],
+    [
+      "Roadmap",
+      "/verdict/docs/roadmap"
+    ],
+    [
+      "GitHub",
+      "https://github.com/quaedra/verdict"
+    ],
+    [
+      "npm",
+      "https://www.npmjs.com/package/@quaedra/verdict"
+    ]
+  ],
+  "source": "https://github.com/quaedra/verdict/blob/main/docs/LANGUAGE.md",
+  "mermaid": false,
+  "html": "<p>A small, statically checked language where <strong>decisions are the branches</strong>. You write\nordinary logic — functions, loops, lists, strings — and wherever a program needs\njudgment you declare a decision and <code>match</code> on it. The checker guarantees every\nanswer <em>and</em> &quot;not sure&quot; is handled before the program runs.</p>\n<pre><code>verdict check program.vd     # every error, with line:col and a caret\nverdict run program.vd       # check, then run\nverdict build program.vd     # train the builtin tier for each decision → .verdict/</code></pre>\n<h2 id=\"hello-world\">Hello world</h2>\n<pre><code>decision greeting: choice \"Is the user saying hello or goodbye?\" {\n  hello: \"a greeting\"\n  goodbye: \"a farewell\"\n  examples { \"hi there\" =&gt; hello  \"bye\" =&gt; goodbye  … }\n  tiers builtin\n}\n\nfn reply(text: text) -&gt; text {\n  match greeting(text) {\n    hello =&gt; \"Hello, world!\"\n    goodbye =&gt; \"Goodbye, world!\"\n    uncertain =&gt; \"Hmm, not sure what you mean.\"\n  }\n}\n\nfor t in [\"hello world\", \"bye world\", \"banana\"] {\n  print(\"{t} → {reply(t)}\")\n}</code></pre>\n<h2 id=\"decisions\">Decisions</h2>\n<pre><code>decision NAME: choice \"question\" { label: \"description\" … }   // 2–255 labels\ndecision NAME: noul   \"question\" { yes: \"…\"  no: \"…\" }        // yes/no; descriptions optional\ndecision NAME: score  \"question\" { low: \"…\"  …  high: \"…\" }   // 2–10 ordered levels, low → high</code></pre>\n<p>Inside the body, in any order:</p>\n<table class=\"data\">\n<thead>\n<tr>\n<th>Entry</th>\n<th>Meaning</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>label: &quot;description&quot;</code></td>\n<td>an answer; the description is what Jet reads</td>\n</tr>\n<tr>\n<td><code>examples { &quot;text&quot; =&gt; label … }</code></td>\n<td>training data for the builtin tier; labels are checked</td>\n</tr>\n<tr>\n<td><code>examples from &quot;file.csv&quot;</code></td>\n<td><code>text,label</code> CSV (Nodd&#39;s format), path relative to the program</td>\n</tr>\n<tr>\n<td><code>tiers builtin -&gt; nodd &quot;dir&quot; -&gt; jet</code></td>\n<td>escalation chain; <code>jet &quot;http://…&quot;</code> for a specific server</td>\n</tr>\n<tr>\n<td><code>threshold 0.85</code></td>\n<td>confidence a tier needs to answer instead of escalating (default 0.7)</td>\n</tr>\n</tbody></table>\n<p>Default tiers: <code>builtin -&gt; jet</code> when there are examples, otherwise <code>jet</code>.\nJet&#39;s URL defaults to <code>$JET_URL</code> (else <code>http://localhost:8000</code>), key from <code>$JET_API_KEY</code>.</p>\n<p>A decision is called like a function and returns an <strong>outcome</strong>:</p>\n<pre><code>let o = moderate(comment)\no.label  o.confidence  o.certain  o.source  o.score  o.latency_ms\nprob(o, \"spam\")\nprint(o)          // spam (97% via builtin)</code></pre>\n<h2 id=\"match\">match</h2>\n<pre><code>match moderate(comment) {\n  ok =&gt; \"publish\"\n  spam =&gt; \"quarantine\"\n  toxic @ 0.9 =&gt; \"hide\"     // guard: only if p(toxic) ≥ 0.9\n  toxic =&gt; \"review\"         // otherwise the next toxic arm\n  uncertain =&gt; \"review\"     // required\n}</code></pre>\n<p>Rules (all checked before running):</p>\n<ul>\n<li>every label has an arm; <code>uncertain</code> is required;</li>\n<li>arms for unknown labels are errors;</li>\n<li>several arms per label are allowed only when all but the last are guarded;\nthe first arm whose guard passes runs; if none passes → <code>uncertain</code>;</li>\n<li>an outcome with <code>certain = false</code> (no tier was confident) always goes to <code>uncertain</code>.</li>\n</ul>\n<p>An arm&#39;s value is its last expression; <code>match</code> is an expression.</p>\n<p><code>if</code> only takes booleans — <code>if moderate(x) { … }</code> is an error that points you to <code>match</code>.\nComparing a label to a literal (<code>o.label == &quot;spma&quot;</code>) is checked against the labels.</p>\n<h2 id=\"deciding-several-things-at-once\">Deciding several things at once</h2>\n<pre><code>let r = decide ticket { topic, human: needs_human, urgency }\nmatch r.human { yes =&gt; … no =&gt; … uncertain =&gt; … }</code></pre>\n<p><code>decide</code> runs all the decisions on one input. At each tier, everything still\nunresolved goes together — Jet gets <strong>one request</strong> for all its questions.</p>\n<h2 id=\"the-rest-of-the-language\">The rest of the language</h2>\n<pre><code>let x = 1                 // declare\nx = x + 1                 // assign (must be declared)\nif x &gt; 1 and not done { … } else if … { … } else { … }\nfor item in list { … }\nwhile cond { … }\nfn name(a: text, b: num) -&gt; text { … }   // last expression is the return value; `return` works too\n\"interpolated {x + 1} text\"              // \\{ for a literal brace\n[1, 2, 3]   xs[0]   xs[-1]   r.field</code></pre>\n<p>Types: <code>text</code>, <code>num</code>, <code>bool</code>, <code>list</code>, <code>any</code>, and a decision&#39;s name for its outcome\n(<code>fn queue(t: topic) -&gt; text { match t { … } }</code>).</p>\n<p>Built-ins: <code>print</code>, <code>len</code>, <code>lower</code>, <code>upper</code>, <code>trim</code>, <code>contains</code>, <code>split</code>, <code>join</code>, <code>str</code>,\n<code>num</code>, <code>round</code>, <code>range</code>, <code>push</code>, <code>read_lines</code>, <code>read_csv</code>, <code>prob</code>.</p>\n<h2 id=\"how-it-runs\">How it runs</h2>\n<p><code>.vd</code> source → lexer → parser → checker → interpreter. Decisions compile to the\nsame runtime decisions the TypeScript API uses, so escalation, batching, tracing and the\nbuiltin / Nodd / Jet tiers are shared. <code>verdict build</code>, <code>eval</code>, <code>label</code> and <code>questions</code>\naccept <code>.vd</code> files as well as TS modules.</p>\n"
+}
