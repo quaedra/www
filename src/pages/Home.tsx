@@ -37,7 +37,6 @@ const PROJECTS: { name: string; href?: string; status: [string, "live" | "traini
     status: ["Released", "live"],
     desc: "Tiny, calibrated text classifiers that run in the browser, offline, in about 20 MB.",
   },
-  { name: "Hestrel", status: ["Released", "live"], desc: "A Quaedra model." },
 ];
 
 export default function Home() {
